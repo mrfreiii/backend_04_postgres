@@ -60,115 +60,115 @@ export class AuthController {
     );
   }
 
-  @Post("registration-confirmation")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(RateLimitGuard)
-  async confirmRegistration(@Body() body: ConfirmUserRegistrationInputDto) {
-    return this.commandBus.execute(
-      new ConfirmUserRegistrationCommand(body.code),
-    );
-  }
+  // @Post("registration-confirmation")
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @UseGuards(RateLimitGuard)
+  // async confirmRegistration(@Body() body: ConfirmUserRegistrationInputDto) {
+  //   return this.commandBus.execute(
+  //     new ConfirmUserRegistrationCommand(body.code),
+  //   );
+  // }
 
-  @Post("registration-email-resending")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(RateLimitGuard)
-  async resendRegistrationEmail(
-    @Req() req: Request,
-    @Body() body: ResendUserRegistrationEmailInputDto,
-  ) {
-    return this.commandBus.execute(
-      new ResendUserRegistrationEmailCommand({
-        email: body.email,
-        currentURL: `${req.protocol + "://" + req.get("host")}`,
-      }),
-    );
-  }
+  // @Post("registration-email-resending")
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @UseGuards(RateLimitGuard)
+  // async resendRegistrationEmail(
+  //   @Req() req: Request,
+  //   @Body() body: ResendUserRegistrationEmailInputDto,
+  // ) {
+  //   return this.commandBus.execute(
+  //     new ResendUserRegistrationEmailCommand({
+  //       email: body.email,
+  //       currentURL: `${req.protocol + "://" + req.get("host")}`,
+  //     }),
+  //   );
+  // }
 
-  @Post("password-recovery")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(RateLimitGuard)
-  async sendPasswordRecoveryCode(
-    @Req() req: Request,
-    @Body() body: SendPasswordRecoveryCodeInputDto,
-  ) {
-    return this.commandBus.execute(
-      new SendUserPasswordRecoveryCodeCommand({
-        email: body.email,
-        currentURL: `${req.protocol + "://" + req.get("host")}`,
-      }),
-    );
-  }
+  // @Post("password-recovery")
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @UseGuards(RateLimitGuard)
+  // async sendPasswordRecoveryCode(
+  //   @Req() req: Request,
+  //   @Body() body: SendPasswordRecoveryCodeInputDto,
+  // ) {
+  //   return this.commandBus.execute(
+  //     new SendUserPasswordRecoveryCodeCommand({
+  //       email: body.email,
+  //       currentURL: `${req.protocol + "://" + req.get("host")}`,
+  //     }),
+  //   );
+  // }
 
-  @Post("new-password")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(RateLimitGuard)
-  async updatePassword(@Body() body: UpdatePasswordInputDto) {
-    return this.commandBus.execute(new UpdateUserPasswordCommand(body));
-  }
+  // @Post("new-password")
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @UseGuards(RateLimitGuard)
+  // async updatePassword(@Body() body: UpdatePasswordInputDto) {
+  //   return this.commandBus.execute(new UpdateUserPasswordCommand(body));
+  // }
 
-  @Post("login")
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(RateLimitGuard, LocalAuthGuard)
-  async loginUser(
-    @ExtractUserFromRequest() user: UserContextDto,
-    @Req() req: Request,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<{
-    accessToken: string;
-  }> {
-    const userAgent = req.headers["user-agent"];
-    const ip = req.ip;
+  // @Post("login")
+  // @HttpCode(HttpStatus.OK)
+  // @UseGuards(RateLimitGuard, LocalAuthGuard)
+  // async loginUser(
+  //   @ExtractUserFromRequest() user: UserContextDto,
+  //   @Req() req: Request,
+  //   @Res({ passthrough: true }) response: Response,
+  // ): Promise<{
+  //   accessToken: string;
+  // }> {
+  //   const userAgent = req.headers["user-agent"];
+  //   const ip = req.ip;
+  //
+  //   const result = await this.commandBus.execute(
+  //     new LoginUserCommand({ userId: user.id, userAgent, ip }),
+  //   );
+  //
+  //   response.cookie("refreshToken", result.refreshToken, {
+  //     httpOnly: true,
+  //     secure: true,
+  //   });
+  //
+  //   return { accessToken: result.accessToken };
+  // }
 
-    const result = await this.commandBus.execute(
-      new LoginUserCommand({ userId: user.id, userAgent, ip }),
-    );
+  // @ApiBearerAuth()
+  // @Get("me")
+  // @UseGuards(JwtAuthGuard)
+  // me(@ExtractUserFromRequest() user: UserContextDto): Promise<MeViewDto> {
+  //   return this.authQueryRepository.me(user.id);
+  // }
 
-    response.cookie("refreshToken", result.refreshToken, {
-      httpOnly: true,
-      secure: true,
-    });
+  // @Post("refresh-token")
+  // @HttpCode(HttpStatus.OK)
+  // @UseGuards(CookieJwtAuthGuard)
+  // async refreshToken(
+  //   @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
+  //   @Req() req: Request,
+  //   @Res({ passthrough: true }) response: Response,
+  // ): Promise<{
+  //   accessToken: string;
+  // }> {
+  //   const userAgent = req.headers["user-agent"];
+  //   const ip = req.ip;
+  //
+  //   const result = await this.commandBus.execute(
+  //     new RefreshTokenCommand({ payload, userAgent, ip }),
+  //   );
+  //
+  //   response.cookie("refreshToken", result.refreshToken, {
+  //     httpOnly: true,
+  //     secure: true,
+  //   });
+  //
+  //   return { accessToken: result.accessToken };
+  // }
 
-    return { accessToken: result.accessToken };
-  }
-
-  @ApiBearerAuth()
-  @Get("me")
-  @UseGuards(JwtAuthGuard)
-  me(@ExtractUserFromRequest() user: UserContextDto): Promise<MeViewDto> {
-    return this.authQueryRepository.me(user.id);
-  }
-
-  @Post("refresh-token")
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(CookieJwtAuthGuard)
-  async refreshToken(
-    @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
-    @Req() req: Request,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<{
-    accessToken: string;
-  }> {
-    const userAgent = req.headers["user-agent"];
-    const ip = req.ip;
-
-    const result = await this.commandBus.execute(
-      new RefreshTokenCommand({ payload, userAgent, ip }),
-    );
-
-    response.cookie("refreshToken", result.refreshToken, {
-      httpOnly: true,
-      secure: true,
-    });
-
-    return { accessToken: result.accessToken };
-  }
-
-  @Post("logout")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(CookieJwtAuthGuard)
-  async logout(
-    @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
-  ): Promise<void> {
-    return this.commandBus.execute(new LogoutUserCommand(payload));
-  }
+  // @Post("logout")
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @UseGuards(CookieJwtAuthGuard)
+  // async logout(
+  //   @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
+  // ): Promise<void> {
+  //   return this.commandBus.execute(new LogoutUserCommand(payload));
+  // }
 }

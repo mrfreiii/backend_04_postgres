@@ -16,6 +16,10 @@ export class RateLimitGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    if(!this.coreConfig.rateLimitEnabled){
+      return true;
+    }
+
     const req = context.switchToHttp().getRequest();
 
     const url = req.originalUrl;

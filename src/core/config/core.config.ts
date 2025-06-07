@@ -39,11 +39,49 @@ export class CoreConfig {
   })
   mongoDbName: string;
 
+  @IsNotEmpty({
+    message:
+        "Set Env variable POSTGRES_URL, example: localhost",
+  })
+  postgresURL: string;
+
+  @IsNumber(
+      {},
+      {
+        message: "Set Env variable POSTGRES_PORT, example: 5432",
+      },
+  )
+  postgresPort: number;
+
+  @IsNotEmpty({
+    message:
+        "Set Env variable POSTGRES_USERNAME, example: username",
+  })
+  postgresUsername: string;
+
+  @IsNotEmpty({
+    message:
+        "Set Env variable POSTGRES_PASSWORD, example: password",
+  })
+  postgresPassword: string;
+
+  @IsNotEmpty({
+    message:
+        "Set Env variable POSTGRES_DB_NAME, example: dbname",
+  })
+  postgresDbName: string;
+
   @IsBoolean({
     message:
       "Set Env variable SEND_INTERNAL_SERVER_ERROR_DETAILS to enable/disable Dangerous for production internal server error details (message, etc), example: true, available values: true, false, 0, 1",
   })
   sendInternalServerErrorDetails: boolean;
+
+  @IsBoolean({
+    message:
+        "Set Env variable RATE_LIMIT_ENABLED to enable/disable, dangerous for production! Example: true, available values: true, false, 0, 1",
+  })
+  rateLimitEnabled: boolean;
 
   @IsNumber(
     {},
@@ -62,25 +100,42 @@ export class CoreConfig {
   rateLimitRequestsInPeriod: number;
 
   constructor(private configService: ConfigService<any, true>) {
+    // env settings
     this.env = this.configService.get("NODE_ENV");
     this.port = configValidationUtility.convertToNumber(
       this.configService.get("PORT"),
     ) as number;
 
+    // Mongo settings
     this.mongoURL = this.configService.get("MONGO_URL");
     this.mongoDbName = this.configService.get("MONGO_DB_NAME");
 
-    this.sendInternalServerErrorDetails =
-      configValidationUtility.convertToBoolean(
-        this.configService.get("SEND_INTERNAL_SERVER_ERROR_DETAILS"),
-      ) as boolean;
+    // Postgres settings
+    this.postgresURL = this.configService.get("POSTGRES_URL");
+    this.postgresPort = configValidationUtility.convertToNumber(
+        this.configService.get("POSTGRES_PORT"),
+    ) as number;
+    this.postgresUsername = this.configService.get("POSTGRES_USERNAME");
+    this.postgresPassword = this.configService.get("POSTGRES_PASSWORD");
+    this.postgresDbName = this.configService.get("POSTGRES_DB_NAME");
 
+    // Rate limit settings
+    this.rateLimitEnabled =
+        configValidationUtility.convertToBoolean(
+            this.configService.get("RATE_LIMIT_ENABLED"),
+        ) as boolean;
     this.rateLimitPeriodInSec = configValidationUtility.convertToNumber(
       this.configService.get("RATE_LIMIT_PERIOD_IN_SEC"),
     ) as number;
     this.rateLimitRequestsInPeriod = configValidationUtility.convertToNumber(
       this.configService.get("RATE_LIMIT_REQUESTS_IN_PERIOD"),
     ) as number;
+
+    // Other settings
+    this.sendInternalServerErrorDetails =
+        configValidationUtility.convertToBoolean(
+            this.configService.get("SEND_INTERNAL_SERVER_ERROR_DETAILS"),
+        ) as boolean;
 
     configValidationUtility.validateConfig(this);
   }
