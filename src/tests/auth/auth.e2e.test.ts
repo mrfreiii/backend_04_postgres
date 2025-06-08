@@ -9,7 +9,11 @@ import {
 } from "../helpers";
 import { SETTINGS } from "../../settings";
 import { deleteRateLimitsData } from "../testing/helpers";
-import { DEFAULT_USER_EMAIL, registerTestUser } from "./helpers";
+import {
+  DEFAULT_USER_EMAIL,
+  getUserRegistrationConfirmationCode,
+  registerTestUser,
+} from "./helpers";
 import { createTestUsers, getUsersJwtTokens } from "../users/helpers";
 import { UserViewDto } from "../../modules/user-accounts/users/api/view-dto/users.view-dto";
 import { RegisterUserInputDto } from "../../modules/user-accounts/auth/api/input-dto/register-user.input-dto";
@@ -163,124 +167,129 @@ describe("register user /registration", () => {
   // });
 });
 
-// describe("confirm user registration /registration-confirmation", () => {
-//   connectToTestDBAndClearRepositories();
-//
-//   beforeAll(async () => {
-//     await registerTestUser();
-//   });
-//
-//   beforeEach(async () => {
-//     await deleteRateLimitsData();
-//   });
-//
-//   afterEach(() => {
-//     global.Date = RealDate;
-//   });
-//
-//   it("should return 400 for code not a string", async () => {
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-//       .send({ code: 777 })
-//       .expect(400);
-//
-//     expect(res.body.errorsMessages.length).toBe(1);
-//     expect(res.body.errorsMessages).toEqual([
-//       {
-//         field: "code",
-//         message: "code must be a string; Received value: 777",
-//       },
-//     ]);
-//   });
-//
-//   it("should return 400 for invalid confirmation code", async () => {
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-//       .send({ code: "00000" })
-//       .expect(400);
-//
-//     expect(res.body.errorsMessages.length).toBe(1);
-//     expect(res.body.errorsMessages).toEqual([
-//       {
-//         field: "code",
-//         message: "Invalid confirmation code",
-//       },
-//     ]);
-//   });
-//
-//   it("should return 400 for code expiration", async () => {
-//     mockDate("2098-11-25T12:34:56z");
-//
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-//       .send({ code: validConfirmationOrRecoveryCode })
-//       .expect(400);
-//
-//     expect(res.body.errorsMessages.length).toBe(1);
-//     expect(res.body.errorsMessages).toEqual([
-//       {
-//         field: "code",
-//         message: "Confirmation code expired",
-//       },
-//     ]);
-//   });
-//
-//   it("should return 204 for correct confirmation code", async () => {
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-//       .send({ code: validConfirmationOrRecoveryCode })
-//       .expect(204);
-//   });
-//
-//   it("should return 429 for 6th attempt and 400 after waiting 10sec", async () => {
-//     // attempt #1
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-//       .send({ code: "00000" })
-//       .expect(400);
-//
-//     // attempt #2
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-//       .send({ code: "00000" })
-//       .expect(400);
-//
-//     // attempt #3
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-//       .send({ code: "00000" })
-//       .expect(400);
-//
-//     // attempt #4
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-//       .send({ code: "00000" })
-//       .expect(400);
-//
-//     // attempt #5
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-//       .send({ code: "00000" })
-//       .expect(400);
-//
-//     // attempt #6
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-//       .send({ code: "00000" })
-//       .expect(429);
-//
-//     const dateInFuture = add(new Date(), {
-//       seconds: 10,
-//     });
-//     mockDate(dateInFuture.toISOString());
-//
-//     // attempt #7 after waiting
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-//       .send({ code: "00000" })
-//       .expect(400);
-//   });
-// });
+describe("confirm user registration /registration-confirmation", () => {
+  connectToTestDBAndClearRepositories();
+
+  let validConfirmationCode: string;
+
+  beforeAll(async () => {
+    const email = "confirmRegistration@email.com";
+    await registerTestUser([email]);
+
+    validConfirmationCode = await getUserRegistrationConfirmationCode(email);
+  });
+
+  // beforeEach(async () => {
+  //   await deleteRateLimitsData();
+  // });
+
+  afterEach(() => {
+    global.Date = RealDate;
+  });
+
+  it("should return 400 for code not a string", async () => {
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+      .send({ code: 777 })
+      .expect(400);
+
+    expect(res.body.errorsMessages.length).toBe(1);
+    expect(res.body.errorsMessages).toEqual([
+      {
+        field: "code",
+        message: "code must be a string; Received value: 777",
+      },
+    ]);
+  });
+
+  it("should return 400 for invalid confirmation code", async () => {
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+      .send({ code: "00000" })
+      .expect(400);
+
+    expect(res.body.errorsMessages.length).toBe(1);
+    expect(res.body.errorsMessages).toEqual([
+      {
+        field: "code",
+        message: "Invalid confirmation code",
+      },
+    ]);
+  });
+
+  it("should return 400 for code expiration", async () => {
+    mockDate("2098-11-25T12:34:56z");
+
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+      .send({ code: validConfirmationCode })
+      .expect(400);
+
+    expect(res.body.errorsMessages.length).toBe(1);
+    expect(res.body.errorsMessages).toEqual([
+      {
+        field: "code",
+        message: "Confirmation code expired",
+      },
+    ]);
+  });
+
+  it("should return 204 for correct confirmation code", async () => {
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+      .send({ code: validConfirmationCode })
+      .expect(204);
+  });
+
+  // it("should return 429 for 6th attempt and 400 after waiting 10sec", async () => {
+  //   // attempt #1
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+  //     .send({ code: "00000" })
+  //     .expect(400);
+  //
+  //   // attempt #2
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+  //     .send({ code: "00000" })
+  //     .expect(400);
+  //
+  //   // attempt #3
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+  //     .send({ code: "00000" })
+  //     .expect(400);
+  //
+  //   // attempt #4
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+  //     .send({ code: "00000" })
+  //     .expect(400);
+  //
+  //   // attempt #5
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+  //     .send({ code: "00000" })
+  //     .expect(400);
+  //
+  //   // attempt #6
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+  //     .send({ code: "00000" })
+  //     .expect(429);
+  //
+  //   const dateInFuture = add(new Date(), {
+  //     seconds: 10,
+  //   });
+  //   mockDate(dateInFuture.toISOString());
+  //
+  //   // attempt #7 after waiting
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+  //     .send({ code: "00000" })
+  //     .expect(400);
+  // });
+});
 
 // describe("resend registration email /registration-email-resending", () => {
 //   connectToTestDBAndClearRepositories();

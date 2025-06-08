@@ -6,6 +6,7 @@ import { CreateUserCommand } from "./create-user.usecase";
 import { UsersRepository } from "../../infrastructure/users.repository";
 import { EmailService } from "../../../../notifications/application/email.service";
 import { RegisterUserInputDto } from "../../../auth/api/input-dto/register-user.input-dto";
+import { RegistrationEntity } from "../../domain/registration.entity.pg";
 
 export class RegisterUserCommand {
   constructor(
@@ -24,6 +25,7 @@ export class RegisterUserCommandHandler
     private usersRepository: UsersRepository,
     private commandBus: CommandBus,
     private emailService: EmailService,
+    private registrationEntity: RegistrationEntity,
   ) {}
 
   async execute({ inputData }: RegisterUserCommand): Promise<void> {
@@ -35,21 +37,17 @@ export class RegisterUserCommandHandler
     const user =
       await this.usersRepository.findOrNotFoundFail_pg(createdUserId);
 
-    const confirmationCode = uuidv4();
-    const codeExpirationDate = add(new Date(), {
-      minutes: 2,
-    }).getTime();
+    const registrationInfo =
+      this.registrationEntity.createInstance(createdUserId);
 
-    await this.usersRepository.setRegistrationConfirmationCode_pg({
-      userId: createdUserId,
-      confirmationCode,
-      codeExpirationDate,
-    });
+    await this.usersRepository.setRegistrationConfirmationCode_pg(
+      registrationInfo,
+    );
 
     this.emailService
       .sendEmailWithConfirmationCode({
         email: user.email,
-        confirmationCode,
+        confirmationCode: registrationInfo.confirmationCode,
         currentURL,
       })
       .catch(console.error);

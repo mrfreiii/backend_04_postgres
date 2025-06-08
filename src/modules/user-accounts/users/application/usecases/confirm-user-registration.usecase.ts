@@ -19,8 +19,8 @@ export class ConfirmUserRegistrationCommandHandler
   ) {}
 
   async execute({ code }: ConfirmUserRegistrationCommand): Promise<void> {
-    const user = await this.usersRepository.findByConfirmationCode(code);
-    if (!user) {
+    const registrationInfo = await this.usersRepository.findRegistrationInfoByConfirmationCode_pg(code);
+    if (!registrationInfo) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: "Invalid confirmation code",
@@ -33,6 +33,20 @@ export class ConfirmUserRegistrationCommandHandler
       });
     }
 
+    if (registrationInfo.codeExpirationDate < new Date().getTime()) {
+      throw new DomainException({
+        code: DomainExceptionCode.ConfirmationCodeExpired,
+        message: "Confirmation code expired",
+        extensions: [
+          {
+            field: "code",
+            message: "Confirmation code expired",
+          },
+        ],
+      });
+    }
+
+    const user = await this.usersRepository.findOrNotFoundFail_pg(registrationInfo.userId)
     if (user.isEmailConfirmed) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
@@ -46,20 +60,6 @@ export class ConfirmUserRegistrationCommandHandler
       });
     }
 
-    if (user.confirmationCodeExpirationDate < new Date().getTime()) {
-      throw new DomainException({
-        code: DomainExceptionCode.ConfirmationCodeExpired,
-        message: "Confirmation code expired",
-        extensions: [
-          {
-            field: "code",
-            message: "Confirmation code expired",
-          },
-        ],
-      });
-    }
-
-    user.confirmRegistration();
-    await this.usersRepository.save(user);
+    await this.usersRepository.confirmUserRegistration_pg(registrationInfo.userId)
   }
 }

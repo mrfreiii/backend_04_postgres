@@ -2,7 +2,14 @@ import { Connection } from "mongoose";
 import { DataSource } from "typeorm";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { InjectConnection, InjectModel } from "@nestjs/mongoose";
-import { Controller, Delete, HttpCode, HttpStatus } from "@nestjs/common";
+import {
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+} from "@nestjs/common";
 
 import {
   RateLimit,
@@ -45,6 +52,49 @@ export class TestingController {
           {
             field: "",
             message: "Failed to truncate tables",
+          },
+        ],
+      });
+    }
+  }
+
+  @Get("registration-code/:email")
+  async getRegistrationCodeByEmail(@Param("email") email: string) {
+    const userQuery = `
+       SELECT * FROM ${SETTINGS.TABLES.USERS} WHERE "email" = $1
+    `;
+
+    try {
+      const userResponse = await this.dataSource.query(userQuery, [email]);
+      const user = userResponse[0];
+
+      if (!user) {
+        throw new DomainException({
+          code: DomainExceptionCode.NotFound,
+          message: "User not found",
+          extensions: [
+            {
+              field: "",
+              message: "User not found",
+            },
+          ],
+        });
+      }
+
+      const codeQuery = `
+       SELECT * FROM ${SETTINGS.TABLES.USERS_REGISTRATION_INFO} WHERE "userId" = $1
+    `;
+
+      const codeResponse = await this.dataSource.query(codeQuery, [user.id]);
+      return { code: codeResponse[0].confirmationCode };
+    } catch {
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get user registration confirmation code",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to get user registration confirmation code",
           },
         ],
       });

@@ -9,6 +9,7 @@ import { SETTINGS } from "../../../../settings";
 import { User, UserDocument, UserModelType } from "../domain/user.entity";
 import { DomainException } from "../../../../core/exceptions/domain-exceptions";
 import { DomainExceptionCode } from "../../../../core/exceptions/domain-exception-codes";
+import { RegistrationEntity } from "../domain/registration.entity.pg";
 
 @Injectable()
 export class UsersRepository {
@@ -73,7 +74,7 @@ export class UsersRepository {
     }
   }
 
-  async findByEmail_pg(email: string): Promise<boolean> {
+  async findByEmail_pg(email: string): Promise<User> {
     const query = `
        SELECT * FROM ${SETTINGS.TABLES.USERS} WHERE "email" = $1
     `;
@@ -196,6 +197,57 @@ export class UsersRepository {
           {
             field: "",
             message: "Failed to add registration confirmation code",
+          },
+        ],
+      });
+    }
+  }
+
+  async findRegistrationInfoByConfirmationCode_pg(
+    confirmationCode: string,
+  ): Promise<RegistrationEntity | null> {
+    if (!isValidUUID(confirmationCode)) {
+      return null;
+    }
+
+    const query = `
+       SELECT * FROM ${SETTINGS.TABLES.USERS_REGISTRATION_INFO} WHERE "confirmationCode" = $1
+    `;
+
+    try {
+      const response = await this.dataSource.query(query, [confirmationCode]);
+      return response[0];
+    } catch (e){
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get row with registration confirmation code",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to get row with registration confirmation code",
+          },
+        ],
+      });
+    }
+  }
+
+  async confirmUserRegistration_pg(userId: string): Promise<void> {
+    const query = `
+       UPDATE ${SETTINGS.TABLES.USERS} SET "isEmailConfirmed" = true WHERE "id" = $1
+    `;
+
+    try {
+      await this.dataSource.query(query, [userId]);
+    } catch (e){
+      console.log(e)
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to confirm user registration",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to confirm user registration",
           },
         ],
       });

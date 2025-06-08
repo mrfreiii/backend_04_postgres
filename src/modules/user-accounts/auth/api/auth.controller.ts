@@ -60,14 +60,14 @@ export class AuthController {
     );
   }
 
-  // @Post("registration-confirmation")
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // @UseGuards(RateLimitGuard)
-  // async confirmRegistration(@Body() body: ConfirmUserRegistrationInputDto) {
-  //   return this.commandBus.execute(
-  //     new ConfirmUserRegistrationCommand(body.code),
-  //   );
-  // }
+  @Post("registration-confirmation")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(RateLimitGuard)
+  async confirmRegistration(@Body() body: ConfirmUserRegistrationInputDto) {
+    return this.commandBus.execute(
+      new ConfirmUserRegistrationCommand(body.code),
+    );
+  }
 
   // @Post("registration-email-resending")
   // @HttpCode(HttpStatus.NO_CONTENT)

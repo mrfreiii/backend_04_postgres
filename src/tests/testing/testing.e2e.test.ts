@@ -7,6 +7,7 @@ import { SETTINGS } from "../../settings";
 import { createTestUsers } from "../users/helpers";
 import { createTestBlogs } from "../blogs/helpers";
 import { createTestPosts } from "../posts/helpers";
+import { DEFAULT_USER_EMAIL, registerTestUser } from "../auth/helpers";
 
 describe("delete all data", () => {
   connectToTestDBAndClearRepositories();
@@ -47,6 +48,18 @@ describe("delete all data", () => {
     //
     // const postsRes = await req.get(SETTINGS.PATH.POSTS).expect(200);
     // expect(postsRes.body.items.length).toBe(0);
+  });
+});
+
+describe("get user registration confirmation code", () => {
+  connectToTestDBAndClearRepositories();
+
+  it("should return code", async () => {
+    await registerTestUser();
+
+    const res = await req.get(`${SETTINGS.PATH.TESTING}/registration-code/${DEFAULT_USER_EMAIL}`).expect(200);
+
+    expect(res.body.code).toEqual(expect.any(String));
   });
 });
 
