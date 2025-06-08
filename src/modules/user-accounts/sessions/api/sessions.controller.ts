@@ -25,36 +25,36 @@ export class SessionsController {
     private commandBus: CommandBus,
   ) {}
 
-  @Get()
-  @UseGuards(CookieJwtAuthGuard)
-  async getActiveSessions(
-    @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
-  ) {
-    return this.sessionsQueryRepository.getAllActiveSessions(payload.userId);
-  }
-
-  @Delete()
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(CookieJwtAuthGuard)
-  async deleteAllOtherSessions(
-    @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
-  ): Promise<void> {
-    return this.commandBus.execute(new DeleteAllOtherSessionCommand(payload));
-  }
-
-  @ApiParam({ name: "deviceId" })
-  @Delete(":deviceId")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(CookieJwtAuthGuard)
-  async deleteSessionById(
-    @Param("deviceId") deviceId: string,
-    @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
-  ): Promise<void> {
-    return this.commandBus.execute(
-      new DeleteSessionByIdCommand({
-        deviceIdFromQueryParam: deviceId,
-        payload,
-      }),
-    );
-  }
+  // @Get()
+  // @UseGuards(CookieJwtAuthGuard)
+  // async getActiveSessions(
+  //   @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
+  // ) {
+  //   return this.sessionsQueryRepository.getAllActiveSessions(payload.userId);
+  // }
+  //
+  // @Delete()
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @UseGuards(CookieJwtAuthGuard)
+  // async deleteAllOtherSessions(
+  //   @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
+  // ): Promise<void> {
+  //   return this.commandBus.execute(new DeleteAllOtherSessionCommand(payload));
+  // }
+  //
+  // @ApiParam({ name: "deviceId" })
+  // @Delete(":deviceId")
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @UseGuards(CookieJwtAuthGuard)
+  // async deleteSessionById(
+  //   @Param("deviceId") deviceId: string,
+  //   @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
+  // ): Promise<void> {
+  //   return this.commandBus.execute(
+  //     new DeleteSessionByIdCommand({
+  //       deviceIdFromQueryParam: deviceId,
+  //       payload,
+  //     }),
+  //   );
+  // }
 }

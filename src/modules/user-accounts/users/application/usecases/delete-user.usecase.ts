@@ -9,15 +9,12 @@ export class DeleteUserCommand {
 export class DeleteUserCommandHandler
   implements ICommandHandler<DeleteUserCommand, void>
 {
-  constructor(
-    private usersRepository: UsersRepository,
-  ) {}
+  constructor(private usersRepository: UsersRepository) {}
 
   async execute({ id }: DeleteUserCommand): Promise<void> {
-    const user = await this.usersRepository.findOrNotFoundFail(id);
+    await this.usersRepository.findOrNotFoundFail_pg(id);
 
-    user.makeDeleted();
-
-    await this.usersRepository.save(user);
+    const deletedAt = new Date(Date.now()).toISOString();
+    await this.usersRepository.makeUserDeleted_pg({ id, deletedAt });
   }
 }

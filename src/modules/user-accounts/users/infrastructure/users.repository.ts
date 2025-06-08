@@ -1,14 +1,206 @@
 import mongoose from "mongoose";
-import { InjectModel } from "@nestjs/mongoose";
+import { validate as isValidUUID } from "uuid";
+import { DataSource } from "typeorm";
 import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { InjectDataSource } from "@nestjs/typeorm";
 
+import { SETTINGS } from "../../../../settings";
 import { User, UserDocument, UserModelType } from "../domain/user.entity";
 import { DomainException } from "../../../../core/exceptions/domain-exceptions";
 import { DomainExceptionCode } from "../../../../core/exceptions/domain-exception-codes";
 
 @Injectable()
 export class UsersRepository {
-  constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
+  constructor(
+    @InjectModel(User.name) private UserModel: UserModelType,
+    @InjectDataSource() private dataSource: DataSource,
+  ) {}
+
+  async createUser_pg(user: any) {
+    const query = `
+        INSERT INTO ${SETTINGS.TABLES.USERS}
+            ("id","email","login","passwordHash","isEmailConfirmed","createdAt")
+            VALUES
+            ($1, $2, $3, $4, $5, $6)
+    `;
+
+    try {
+      await this.dataSource.query(query, [
+        user.id,
+        user.email,
+        user.login,
+        user.passwordHash,
+        user.isEmailConfirmed,
+        user.createdAt,
+      ]);
+
+      return user.id;
+    } catch (e) {
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to create user in db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to create user in db",
+          },
+        ],
+      });
+    }
+  }
+
+  async findByLogin_pg(login: string): Promise<boolean> {
+    const query = `
+       SELECT * FROM ${SETTINGS.TABLES.USERS} WHERE "login" = $1
+    `;
+
+    try {
+      const result = await this.dataSource.query(query, [login]);
+      return result?.[0];
+    } catch {
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get user from db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to get user from db",
+          },
+        ],
+      });
+    }
+  }
+
+  async findByEmail_pg(email: string): Promise<boolean> {
+    const query = `
+       SELECT * FROM ${SETTINGS.TABLES.USERS} WHERE "email" = $1
+    `;
+
+    try {
+      const result = await this.dataSource.query(query, [email]);
+      return result?.[0];
+    } catch {
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get user from db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to get user from db",
+          },
+        ],
+      });
+    }
+  }
+
+  async findOrNotFoundFail_pg(id: string): Promise<User> {
+    if (!isValidUUID(id)) {
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        message: "User not found",
+        extensions: [
+          {
+            field: "",
+            message: "User not found",
+          },
+        ],
+      });
+    }
+
+    const query = `
+       SELECT * FROM ${SETTINGS.TABLES.USERS} WHERE "id" = $1
+    `;
+
+    try {
+      const result = await this.dataSource.query(query, [id]);
+      const user = result?.[0];
+
+      if (!user) {
+        throw new DomainException({
+          code: DomainExceptionCode.NotFound,
+          message: "User not found",
+          extensions: [
+            {
+              field: "",
+              message: "User not found",
+            },
+          ],
+        });
+      }
+
+      return user;
+    } catch {
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get user from db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to get user from db",
+          },
+        ],
+      });
+    }
+  }
+
+  async makeUserDeleted_pg(dto: {
+    id: string;
+    deletedAt: string;
+  }): Promise<void> {
+    const query = `
+       UPDATE ${SETTINGS.TABLES.USERS} SET "deletedAt" = '${dto.deletedAt}' WHERE "id" = $1
+    `;
+
+    try {
+      await this.dataSource.query(query, [dto.id]);
+    } catch {
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to delete user from db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to delete user from db",
+          },
+        ],
+      });
+    }
+  }
+
+  async setRegistrationConfirmationCode_pg(dto: {
+    userId: string;
+    confirmationCode: string;
+    codeExpirationDate: number;
+  }): Promise<void> {
+    const query = `
+        INSERT INTO ${SETTINGS.TABLES.USERS_REGISTRATION_INFO}
+            ("confirmationCode","codeExpirationDate","userId")
+            VALUES
+            ($1, $2, $3)
+    `;
+
+    try {
+      await this.dataSource.query(query, [
+        dto.confirmationCode,
+        dto.codeExpirationDate,
+        dto.userId,
+      ]);
+    } catch (e) {
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to add registration confirmation code",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to add registration confirmation code",
+          },
+        ],
+      });
+    }
+  }
 
   async save(user: UserDocument) {
     await user.save();
@@ -54,9 +246,9 @@ export class UsersRepository {
     return user;
   }
 
-  findByLogin(login: string): Promise<UserDocument | null> {
-    return this.UserModel.findOne({ login });
-  }
+  // findByLogin(login: string): Promise<UserDocument | null> {
+  //   return this.UserModel.findOne({ login });
+  // }
 
   findByEmail(email: string): Promise<UserDocument | null> {
     return this.UserModel.findOne({ email });

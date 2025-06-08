@@ -45,7 +45,6 @@ export const connectToTestDBAndClearRepositories = () => {
     req = request(app.getHttpServer());
 
     await req.delete(`${SETTINGS.PATH.TESTING}/all-data`).expect(204);
-    // req.set("Authorization", "");
 
     emailServiceMock.sendEmailWithConfirmationCode = jest
       .fn()

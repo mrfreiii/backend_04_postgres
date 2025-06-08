@@ -7,6 +7,9 @@ export const SETTINGS = {
     COMMENTS: "/comments",
     TESTING: "/testing",
     SESSIONS: "/security/devices",
-    // RATE_LIMIT: '/rate-limit',
+  },
+  TABLES: {
+    USERS: 'public."Users"',
+    USERS_REGISTRATION_INFO: 'public."UsersRegistrationInfo"',
   },
 };

@@ -1,8 +1,10 @@
+import { add } from "date-fns";
+import { v4 as uuidv4 } from "uuid";
 import { CommandBus, CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 
 import { CreateUserCommand } from "./create-user.usecase";
-import { EmailService } from "../../../../notifications/application/email.service";
 import { UsersRepository } from "../../infrastructure/users.repository";
+import { EmailService } from "../../../../notifications/application/email.service";
 import { RegisterUserInputDto } from "../../../auth/api/input-dto/register-user.input-dto";
 
 export class RegisterUserCommand {
@@ -26,14 +28,23 @@ export class RegisterUserCommandHandler
 
   async execute({ inputData }: RegisterUserCommand): Promise<void> {
     const { dto, currentURL } = inputData;
-
     const createdUserId = await this.commandBus.execute(
       new CreateUserCommand(dto),
     );
-    const user = await this.usersRepository.findOrNotFoundFail(createdUserId);
 
-    const confirmationCode = user.setConfirmationCode();
-    await this.usersRepository.save(user);
+    const user =
+      await this.usersRepository.findOrNotFoundFail_pg(createdUserId);
+
+    const confirmationCode = uuidv4();
+    const codeExpirationDate = add(new Date(), {
+      minutes: 2,
+    }).getTime();
+
+    await this.usersRepository.setRegistrationConfirmationCode_pg({
+      userId: createdUserId,
+      confirmationCode,
+      codeExpirationDate,
+    });
 
     this.emailService
       .sendEmailWithConfirmationCode({

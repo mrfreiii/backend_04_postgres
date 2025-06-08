@@ -33,62 +33,62 @@ export class CommentsController {
   //   return this.commentsQueryRepository.getAll({ query });
   // }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtOptionalAuthGuard)
-  @Get(":id")
-  async getById(
-    @Param("id") id: string,
-    @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
-  ): Promise<CommentViewDto> {
-    return this.commentsService.getCommentById({
-      commentId: id,
-      userId: user?.id || null,
-    });
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @Put(":commentId")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async updateCommentById(
-    @Param("commentId") commentId: string,
-    @Body() body: UpdateCommentInputDto,
-    @ExtractUserFromRequest() user: UserContextDto,
-  ) {
-    return this.commentsService.updateComment({
-      userId: user.id,
-      commentId,
-      dto: body,
-    });
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @Delete(":commentId")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteCommentById(
-    @Param("commentId") commentId: string,
-    @ExtractUserFromRequest() user: UserContextDto,
-  ) {
-    return this.commentsService.deleteComment({
-      userId: user.id,
-      commentId,
-    });
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @Put(":commentId/like-status")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async updateCommentLikeStatus(
-    @Param("commentId") commentId: string,
-    @Body() body: UpdateLikeStatusInputDto,
-    @ExtractUserFromRequest() user: UserContextDto,
-  ) {
-    return this.commentsService.updateCommentLikeStatus({
-      userId: user.id,
-      commentId,
-      newLikeStatus: body.likeStatus,
-    });
-  }
+  // @ApiBearerAuth()
+  // @UseGuards(JwtOptionalAuthGuard)
+  // @Get(":id")
+  // async getById(
+  //   @Param("id") id: string,
+  //   @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
+  // ): Promise<CommentViewDto> {
+  //   return this.commentsService.getCommentById({
+  //     commentId: id,
+  //     userId: user?.id || null,
+  //   });
+  // }
+  //
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @Put(":commentId")
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async updateCommentById(
+  //   @Param("commentId") commentId: string,
+  //   @Body() body: UpdateCommentInputDto,
+  //   @ExtractUserFromRequest() user: UserContextDto,
+  // ) {
+  //   return this.commentsService.updateComment({
+  //     userId: user.id,
+  //     commentId,
+  //     dto: body,
+  //   });
+  // }
+  //
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @Delete(":commentId")
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async deleteCommentById(
+  //   @Param("commentId") commentId: string,
+  //   @ExtractUserFromRequest() user: UserContextDto,
+  // ) {
+  //   return this.commentsService.deleteComment({
+  //     userId: user.id,
+  //     commentId,
+  //   });
+  // }
+  //
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @Put(":commentId/like-status")
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async updateCommentLikeStatus(
+  //   @Param("commentId") commentId: string,
+  //   @Body() body: UpdateLikeStatusInputDto,
+  //   @ExtractUserFromRequest() user: UserContextDto,
+  // ) {
+  //   return this.commentsService.updateCommentLikeStatus({
+  //     userId: user.id,
+  //     commentId,
+  //     newLikeStatus: body.likeStatus,
+  //   });
+  // }
 }

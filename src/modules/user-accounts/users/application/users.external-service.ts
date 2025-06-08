@@ -12,10 +12,10 @@ export class UsersExternalService {
   ) {}
 
   async makeUserAsSpammer(userId: string) {
-    const user = await this.usersRepository.findOrNotFoundFail(userId);
+    // const user = await this.usersRepository.findOrNotFoundFail(userId);
 
     // user.makeSpammer();
 
-    await this.usersRepository.save(user);
+    // await this.usersRepository.save(user);
   }
 }

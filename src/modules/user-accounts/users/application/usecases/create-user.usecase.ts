@@ -1,14 +1,11 @@
-import { InjectModel } from "@nestjs/mongoose";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 
 import { CryptoService } from "../crypto.service";
 import { CreateUserDto } from "../../dto/create-user.dto";
-import { User, UserModelType } from "../../domain/user.entity";
 import { UsersRepository } from "../../infrastructure/users.repository";
 import { DomainException } from "../../../../../core/exceptions/domain-exceptions";
-import {
-  DomainExceptionCode,
-} from "../../../../../core/exceptions/domain-exception-codes";
+import { DomainExceptionCode } from "../../../../../core/exceptions/domain-exception-codes";
+import { UserEntity } from "../../domain/user.entity.pg";
 
 export class CreateUserCommand {
   constructor(public dto: CreateUserDto) {}
@@ -19,13 +16,14 @@ export class CreateUserCommandHandler
   implements ICommandHandler<CreateUserCommand, string>
 {
   constructor(
-    @InjectModel(User.name) private UserModel: UserModelType,
+    // @InjectModel(User.name) private UserModel: UserModelType,
     private usersRepository: UsersRepository,
     private cryptoService: CryptoService,
+    private userEntity: UserEntity,
   ) {}
 
   async execute({ dto }: CreateUserCommand): Promise<string> {
-    const userWithTheSameLogin = await this.usersRepository.findByLogin(
+    const userWithTheSameLogin = await this.usersRepository.findByLogin_pg(
       dto.login,
     );
     if (userWithTheSameLogin) {
@@ -41,7 +39,7 @@ export class CreateUserCommandHandler
       });
     }
 
-    const userWithTheSameEmail = await this.usersRepository.findByEmail(
+    const userWithTheSameEmail = await this.usersRepository.findByEmail_pg(
       dto.email,
     );
     if (userWithTheSameEmail) {
@@ -61,14 +59,12 @@ export class CreateUserCommandHandler
       dto.password,
     );
 
-    const user = this.UserModel.createInstance({
+    const user = this.userEntity.createInstance({
       email: dto.email,
       login: dto.login,
-      passwordHash: passwordHash,
+      passwordHash,
     });
 
-    await this.usersRepository.save(user);
-
-    return user._id.toString();
+    return this.usersRepository.createUser_pg(user);
   }
 }
