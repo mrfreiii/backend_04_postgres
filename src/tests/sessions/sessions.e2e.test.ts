@@ -204,75 +204,75 @@ describe("sessions /devices", () => {
     ]);
   });
 
-  // it("should return 401 for request without refresh token - DELETE /devices/{deviceId}", async () => {
-  //   await req.delete(`${SETTINGS.PATH.SESSIONS}/123`).expect(401);
-  // });
+  it("should return 401 for request without refresh token - DELETE /devices/{deviceId}", async () => {
+    await req.delete(`${SETTINGS.PATH.SESSIONS}/123`).expect(401);
+  });
 
-  // it("should return 401 for request with invalid refresh token - DELETE /devices/{deviceId}", async () => {
-  //   await req
-  //     .delete(`${SETTINGS.PATH.SESSIONS}/123`)
-  //     .set("Cookie", ["refreshToken=12345667"])
-  //     .expect(401);
-  // });
+  it("should return 401 for request with invalid refresh token - DELETE /devices/{deviceId}", async () => {
+    await req
+      .delete(`${SETTINGS.PATH.SESSIONS}/123`)
+      .set("Cookie", ["refreshToken=12345667"])
+      .expect(401);
+  });
 
-  // it("should return 404 for non existent device - DELETE /devices/{deviceId}", async () => {
-  //   await req
-  //     .delete(`${SETTINGS.PATH.SESSIONS}/123`)
-  //     .set("Cookie", cookieWithRefreshTokenDevice1)
-  //     .expect(404);
-  // });
+  it("should return 404 for non existent device - DELETE /devices/{deviceId}", async () => {
+    await req
+      .delete(`${SETTINGS.PATH.SESSIONS}/123`)
+      .set("Cookie", cookieWithRefreshTokenDevice1)
+      .expect(404);
+  });
 
-  // it("should return 403 for device of another user - DELETE /devices/{deviceId}", async () => {
-  //   const createdUser2 = (await createTestUsers({ password: userPassword }))[0];
-  //   const authDataAnotherUser = {
-  //     loginOrEmail: createdUser2.login,
-  //     password: userPassword,
-  //   };
-  //
-  //   const res = await req
-  //     .post(`${SETTINGS.PATH.AUTH}/login`)
-  //     .set(
-  //       "User-Agent",
-  //       "Mozilla/5.0 (Linux i651 ; en-US) AppleWebKit/602.33 (KHTML, like Gecko) Chrome/53.0.1935.131 Safari/533",
-  //     )
-  //     .send(authDataAnotherUser)
-  //     .expect(200);
-  //   const deviceIdUser2 = getDeviceIdFromRefreshTokenCookie(
-  //     res.headers["set-cookie"],
-  //   );
-  //
-  //   await req
-  //     .delete(`${SETTINGS.PATH.SESSIONS}/${deviceIdUser2}`)
-  //     .set("Cookie", cookieWithRefreshTokenDevice1)
-  //     .expect(403);
-  // });
+  it("should return 403 for device of another user - DELETE /devices/{deviceId}", async () => {
+    const createdUser2 = (await createTestUsers({ password: userPassword }))[0];
+    const authDataAnotherUser = {
+      loginOrEmail: createdUser2.login,
+      password: userPassword,
+    };
 
-  // it("should delete device - DELETE /devices/{deviceId}", async () => {
-  //   await req
-  //     .delete(`${SETTINGS.PATH.SESSIONS}/${deviceId2}`)
-  //     .set("Cookie", cookieWithRefreshTokenDevice1)
-  //     .expect(204);
-  //
-  //   const sessions = await req
-  //     .get(`${SETTINGS.PATH.SESSIONS}`)
-  //     .set("Cookie", cookieWithRefreshTokenDevice1)
-  //     .expect(200);
-  //
-  //   expect(sessions.body).toEqual([
-  //     {
-  //       deviceId: deviceId1,
-  //       ip: expect.any(String),
-  //       lastActiveDate: expect.any(String),
-  //       title: "Browser: Chrome 53.0.1935.131; OS: Linux i651",
-  //     },
-  //     {
-  //       deviceId: deviceId3,
-  //       ip: expect.any(String),
-  //       lastActiveDate: expect.any(String),
-  //       title: "Browser: Mobile Chrome 51.0.1700.324; OS: iOS 11.1.3",
-  //     },
-  //   ]);
-  // });
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .set(
+        "User-Agent",
+        "Mozilla/5.0 (Linux i651 ; en-US) AppleWebKit/602.33 (KHTML, like Gecko) Chrome/53.0.1935.131 Safari/533",
+      )
+      .send(authDataAnotherUser)
+      .expect(200);
+    const deviceIdUser2 = getDeviceIdFromRefreshTokenCookie(
+      res.headers["set-cookie"],
+    );
+
+    await req
+      .delete(`${SETTINGS.PATH.SESSIONS}/${deviceIdUser2}`)
+      .set("Cookie", cookieWithRefreshTokenDevice1)
+      .expect(403);
+  });
+
+  it("should delete device - DELETE /devices/{deviceId}", async () => {
+    await req
+      .delete(`${SETTINGS.PATH.SESSIONS}/${deviceId2}`)
+      .set("Cookie", cookieWithRefreshTokenDevice1)
+      .expect(204);
+
+    const sessions = await req
+      .get(`${SETTINGS.PATH.SESSIONS}`)
+      .set("Cookie", cookieWithRefreshTokenDevice1)
+      .expect(200);
+
+    expect(sessions.body).toEqual([
+      {
+        deviceId: deviceId3,
+        ip: expect.any(String),
+        lastActiveDate: expect.any(String),
+        title: "Browser: Mobile Chrome 51.0.1700.324; OS: iOS 11.1.3",
+      },
+      {
+        deviceId: deviceId1,
+        ip: expect.any(String),
+        lastActiveDate: expect.any(String),
+        title: "Browser: Chrome 53.0.1935.131; OS: Linux i651",
+      },
+    ]);
+  });
 
   // it("should delete all other devices - DELETE /devices", async () => {
   //   await req

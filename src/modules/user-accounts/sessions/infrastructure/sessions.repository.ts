@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm";
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
+import { validate as isValidUUID } from "uuid";
 import { InjectDataSource } from "@nestjs/typeorm";
 
 import {
@@ -140,6 +141,42 @@ export class SessionsRepository {
           {
             field: "",
             message: "Failed to delete session",
+          },
+        ],
+      });
+    }
+  }
+
+  async findByDeviceId_pg(deviceId: string): Promise<SessionEntityType> {
+    if (!isValidUUID(deviceId)) {
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        message: "Session not found",
+        extensions: [
+          {
+            field: "",
+            message: "Session not found",
+          },
+        ],
+      });
+    }
+
+    const query = `
+        SELECT * FROM ${SETTINGS.TABLES.SESSIONS}
+            WHERE "deviceId" = $1
+    `;
+
+    try {
+      const result = await this.dataSource.query(query, [ deviceId ]);
+      return result?.[0];
+    } catch {
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get session from db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to get session from db",
           },
         ],
       });

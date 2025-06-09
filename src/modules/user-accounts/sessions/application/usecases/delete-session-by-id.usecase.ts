@@ -19,7 +19,7 @@ export class DeleteSessionByIdCommandHandler
     const { deviceIdFromQueryParam, payload } = dto;
 
     const currentUserSession =
-      await this.sessionsRepository.findBy_userId_deviceId_version({
+      await this.sessionsRepository.findBy_userId_deviceId_version_pg({
         userId: payload.userId,
         deviceId: payload.deviceId,
         version: payload.version,
@@ -38,7 +38,7 @@ export class DeleteSessionByIdCommandHandler
       });
     }
 
-    const sessionForDeletion = await this.sessionsRepository.findByDeviceId(
+    const sessionForDeletion = await this.sessionsRepository.findByDeviceId_pg(
       deviceIdFromQueryParam,
     );
     if (!sessionForDeletion) {
@@ -67,21 +67,6 @@ export class DeleteSessionByIdCommandHandler
       });
     }
 
-    const isSessionDeleted = await this.sessionsRepository.deleteSession({
-      userId: sessionForDeletion.userId,
-      deviceId: sessionForDeletion.deviceId,
-    });
-    if (!isSessionDeleted) {
-      throw new DomainException({
-        code: DomainExceptionCode.InternalServerError,
-        message: "Unable session deleting",
-        extensions: [
-          {
-            field: "",
-            message: "Unable session deleting",
-          },
-        ],
-      });
-    }
+    await this.sessionsRepository.deleteSession_pg(sessionForDeletion.deviceId);
   }
 }

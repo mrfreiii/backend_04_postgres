@@ -41,20 +41,20 @@ export class SessionsController {
   // ): Promise<void> {
   //   return this.commandBus.execute(new DeleteAllOtherSessionCommand(payload));
   // }
-  //
-  // @ApiParam({ name: "deviceId" })
-  // @Delete(":deviceId")
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // @UseGuards(CookieJwtAuthGuard)
-  // async deleteSessionById(
-  //   @Param("deviceId") deviceId: string,
-  //   @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
-  // ): Promise<void> {
-  //   return this.commandBus.execute(
-  //     new DeleteSessionByIdCommand({
-  //       deviceIdFromQueryParam: deviceId,
-  //       payload,
-  //     }),
-  //   );
-  // }
+
+  @ApiParam({ name: "deviceId" })
+  @Delete(":deviceId")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(CookieJwtAuthGuard)
+  async deleteSessionById(
+    @Param("deviceId") deviceId: string,
+    @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
+  ): Promise<void> {
+    return this.commandBus.execute(
+      new DeleteSessionByIdCommand({
+        deviceIdFromQueryParam: deviceId,
+        payload,
+      }),
+    );
+  }
 }
