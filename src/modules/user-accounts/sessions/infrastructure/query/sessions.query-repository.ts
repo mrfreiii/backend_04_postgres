@@ -1,24 +1,45 @@
+import { DataSource } from "typeorm";
 import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
+import { InjectDataSource } from "@nestjs/typeorm";
 
+import {
+  DomainExceptionCode
+} from "../../../../../core/exceptions/domain-exception-codes";
+import { SETTINGS } from "../../../../../settings";
+import { SessionEntityType } from "../../domain/session.entity.pg";
 import { SessionViewDto } from "../../api/view-dto/sessions.view-dto";
-import { Session, SessionModelType } from "../../domain/session.entity";
+import { DomainException } from "../../../../../core/exceptions/domain-exceptions";
 
 @Injectable()
 export class SessionsQueryRepository {
-  constructor(
-    @InjectModel(Session.name) private SessionModel: SessionModelType,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async getAllActiveSessions(userId: string): Promise<SessionViewDto[]> {
-    const sessions = await this.SessionModel.find({
-      userId,
-    });
+  async getAllActiveSessions_pg(userId: string): Promise<SessionViewDto[]> {
+    const query = `
+        SELECT * FROM ${SETTINGS.TABLES.SESSIONS}
+            WHERE "userId" = $1
+            ORDER BY "issuedAt" asc
+    `;
 
-    const onlyActiveSessions = sessions.filter(
-      (session) => new Date(session.expirationTime) > new Date(),
-    );
+    try {
+      const sessions: SessionEntityType[] = await this.dataSource.query(query, [ userId ]);
 
-    return onlyActiveSessions.map(SessionViewDto.mapToView);
+      const onlyActiveSessions = sessions.filter(
+          (session) => new Date(session.expirationTime) > new Date(),
+      );
+
+      return onlyActiveSessions.map(SessionViewDto.mapToView);
+    } catch {
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get session from db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to get session from db",
+          },
+        ],
+      });
+    }
   }
 }

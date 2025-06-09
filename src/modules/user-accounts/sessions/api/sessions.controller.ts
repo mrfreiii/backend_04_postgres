@@ -25,14 +25,14 @@ export class SessionsController {
     private commandBus: CommandBus,
   ) {}
 
-  // @Get()
-  // @UseGuards(CookieJwtAuthGuard)
-  // async getActiveSessions(
-  //   @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
-  // ) {
-  //   return this.sessionsQueryRepository.getAllActiveSessions(payload.userId);
-  // }
-  //
+  @Get()
+  @UseGuards(CookieJwtAuthGuard)
+  async getActiveSessions(
+    @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
+  ) {
+    return this.sessionsQueryRepository.getAllActiveSessions_pg(payload.userId);
+  }
+
   // @Delete()
   // @HttpCode(HttpStatus.NO_CONTENT)
   // @UseGuards(CookieJwtAuthGuard)

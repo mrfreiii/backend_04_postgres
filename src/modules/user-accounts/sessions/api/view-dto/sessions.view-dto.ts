@@ -1,4 +1,4 @@
-import { SessionDocument } from "../../domain/session.entity";
+import { SessionEntityType } from "../../domain/session.entity.pg";
 
 export class SessionViewDto {
   ip: string;
@@ -6,7 +6,7 @@ export class SessionViewDto {
   lastActiveDate: string;
   deviceId: string;
 
-  static mapToView(session: SessionDocument): SessionViewDto {
+  static mapToView(session: SessionEntityType): SessionViewDto {
     const dto = new SessionViewDto();
 
     dto.ip = session.ip;
