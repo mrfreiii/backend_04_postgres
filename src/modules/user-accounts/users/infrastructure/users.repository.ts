@@ -112,29 +112,17 @@ export class UsersRepository {
       });
     }
 
+    let user: UserEntity;
+
     const query = `
        SELECT * FROM ${SETTINGS.TABLES.USERS} WHERE "id" = $1
     `;
 
     try {
       const result = await this.dataSource.query(query, [id]);
-      const user = result?.[0];
-
-      if (!user) {
-        throw new DomainException({
-          code: DomainExceptionCode.NotFound,
-          message: "User not found",
-          extensions: [
-            {
-              field: "",
-              message: "User not found",
-            },
-          ],
-        });
-      }
-
-      return user;
-    } catch {
+      user = result?.[0];
+    } catch (e) {
+      console.log(e);
       throw new DomainException({
         code: DomainExceptionCode.InternalServerError,
         message: "Failed to get user from db",
@@ -146,6 +134,20 @@ export class UsersRepository {
         ],
       });
     }
+
+    if (!user) {
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        message: "User not found",
+        extensions: [
+          {
+            field: "",
+            message: "User not found",
+          },
+        ],
+      });
+    }
+    return user;
   }
 
   async makeUserDeleted_pg(dto: {

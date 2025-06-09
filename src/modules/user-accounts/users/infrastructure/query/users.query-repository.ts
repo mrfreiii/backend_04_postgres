@@ -69,7 +69,8 @@ export class UsersQueryRepository {
     }
 
     if (requestParams.searchEmailTerm) {
-      const emailPart = `AND "email" ilike $${queryParams.length + 1}`;
+      const operator = requestParams.searchLoginTerm ? "OR" : "AND";
+      const emailPart = `${operator} "email" ilike $${queryParams.length + 1}`;
 
       dataQuery = `${dataQuery} ${emailPart}`;
       countQuery = `${countQuery} ${emailPart}`;
