@@ -1,20 +1,7 @@
-import { Connection } from "mongoose";
 import { DataSource } from "typeorm";
 import { InjectDataSource } from "@nestjs/typeorm";
-import { InjectConnection, InjectModel } from "@nestjs/mongoose";
-import {
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-} from "@nestjs/common";
+import { Controller, Delete, Get, HttpCode, HttpStatus, Param, } from "@nestjs/common";
 
-import {
-  RateLimit,
-  RateLimitModelType,
-} from "../rateLimit/domain/rateLimit.entity";
 import { SETTINGS } from "../../settings";
 import { DomainException } from "../../core/exceptions/domain-exceptions";
 import { DomainExceptionCode } from "../../core/exceptions/domain-exception-codes";
@@ -22,8 +9,8 @@ import { DomainExceptionCode } from "../../core/exceptions/domain-exception-code
 @Controller(SETTINGS.PATH.TESTING)
 export class TestingController {
   constructor(
-    @InjectConnection() private readonly databaseConnection: Connection,
-    @InjectModel(RateLimit.name) private RateLimitModel: RateLimitModelType,
+    // @InjectConnection() private readonly databaseConnection: Connection,
+    // @InjectModel(RateLimit.name) private RateLimitModel: RateLimitModelType,
     @InjectDataSource() private dataSource: DataSource,
   ) {}
 
@@ -143,14 +130,15 @@ export class TestingController {
       });
     }
   }
-  //
-  // @Delete("rate-limits")
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // async deleteRateLimit() {
-  //   await this.RateLimitModel.deleteMany({});
-  //
-  //   return {
-  //     status: "succeeded",
-  //   };
-  // }
+
+  @Delete("rate-limits")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteRateLimit() {
+    const query = `TRUNCATE TABLE ${SETTINGS.TABLES.RATE_LIMIT}`;
+    await this.dataSource.query(query);
+
+    return {
+      status: "succeeded",
+    };
+  }
 }

@@ -86,10 +86,10 @@ describe("get user password recovery code", () => {
   });
 });
 
-// describe("delete rate limits", () => {
-//   connectToTestDBAndClearRepositories();
-//
-//   it("should delete rate limits", async () => {
-//     await req.delete(`${SETTINGS.PATH.TESTING}/rate-limits`).expect(204);
-//   });
-// });
+describe("delete rate limits", () => {
+  connectToTestDBAndClearRepositories();
+
+  it("should delete rate limits", async () => {
+    await req.delete(`${SETTINGS.PATH.TESTING}/rate-limits`).expect(204);
+  });
+});

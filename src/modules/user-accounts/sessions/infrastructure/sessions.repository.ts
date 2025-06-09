@@ -1,13 +1,8 @@
 import { DataSource } from "typeorm";
 import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
 import { validate as isValidUUID } from "uuid";
 import { InjectDataSource } from "@nestjs/typeorm";
 
-import {
-  Session,
-  SessionModelType,
-} from "../domain/session.entity";
 import { SETTINGS } from "../../../../settings";
 import { SessionEntityType } from "../domain/session.entity.pg";
 import { DomainException } from "../../../../core/exceptions/domain-exceptions";
@@ -15,10 +10,7 @@ import { DomainExceptionCode } from "../../../../core/exceptions/domain-exceptio
 
 @Injectable()
 export class SessionsRepository {
-  constructor(
-    @InjectModel(Session.name) private SessionModel: SessionModelType,
-    @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createSession_pg(session: SessionEntityType) {
     const query = `
@@ -166,7 +158,7 @@ export class SessionsRepository {
     `;
 
     try {
-      const result = await this.dataSource.query(query, [ deviceId ]);
+      const result = await this.dataSource.query(query, [deviceId]);
       return result?.[0];
     } catch {
       throw new DomainException({

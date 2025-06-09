@@ -1,37 +1,30 @@
 import { add } from "date-fns";
 
 import {
-  connectToTestDBAndClearRepositories,
-  emailServiceMock,
+  req,
   mockDate,
   RealDate,
-  req,
+  emailServiceMock,
+  connectToTestDBAndClearRepositories,
 } from "../helpers";
-import { SETTINGS } from "../../settings";
-import { deleteRateLimitsData } from "../testing/helpers";
 import {
   DEFAULT_USER_EMAIL,
+  registerTestUser,
   getUserPasswordRecoveryCode,
   getUserRegistrationConfirmationCode,
-  registerTestUser,
 } from "./helpers";
+import { SETTINGS } from "../../settings";
+import { deleteRateLimitsData } from "../testing/helpers";
 import { createTestUsers, getUsersJwtTokens } from "../users/helpers";
 import { UserViewDto } from "../../modules/user-accounts/users/api/view-dto/users.view-dto";
 import { RegisterUserInputDto } from "../../modules/user-accounts/auth/api/input-dto/register-user.input-dto";
 
-// const validConfirmationOrRecoveryCode = "65b94a69-0243-4dbe-aafb-47f46e147d6a";
-// jest.mock("uuid", () => ({
-//   v4: () => {
-//     return validConfirmationOrRecoveryCode;
-//   },
-// }));
-
 describe("register user /registration", () => {
   connectToTestDBAndClearRepositories();
 
-  // beforeEach(async () => {
-  //   await deleteRateLimitsData();
-  // });
+  beforeEach(async () => {
+    await deleteRateLimitsData();
+  });
 
   it("should return 400 for login, password, and email are not string", async () => {
     const newUser: RegisterUserInputDto = {
@@ -103,69 +96,69 @@ describe("register user /registration", () => {
     });
   });
 
-  // it("should return 429 for 6th attempt during 10 seconds", async () => {
-  //   const newUser1: { login: string; email: string; password: string } = {
-  //     login: "user1Login",
-  //     password: "user1Password",
-  //     email: "user1@email.com",
-  //   };
-  //   const newUser2: { login: string; email: string; password: string } = {
-  //     login: "user2Login",
-  //     password: "user2Password",
-  //     email: "user2@email.com",
-  //   };
-  //   const newUser3: { login: string; email: string; password: string } = {
-  //     login: "user3Login",
-  //     password: "user3Password",
-  //     email: "user3@email.com",
-  //   };
-  //   const newUser4: { login: string; email: string; password: string } = {
-  //     login: "user4Login",
-  //     password: "user4Password",
-  //     email: "user4@email.com",
-  //   };
-  //   const newUser5: { login: string; email: string; password: string } = {
-  //     login: "user5Login",
-  //     password: "user5Password",
-  //     email: "user5@email.com",
-  //   };
-  //   const newUser6: { login: string; email: string; password: string } = {
-  //     login: "user6Login",
-  //     password: "user6Password",
-  //     email: "user6@email.com",
-  //   };
-  //
-  //   // attempt #1
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration`)
-  //     .send(newUser1)
-  //     .expect(204);
-  //   // attempt #2
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration`)
-  //     .send(newUser2)
-  //     .expect(204);
-  //   // attempt #3
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration`)
-  //     .send(newUser3)
-  //     .expect(204);
-  //   // attempt #4
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration`)
-  //     .send(newUser4)
-  //     .expect(204);
-  //   // attempt #5
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration`)
-  //     .send(newUser5)
-  //     .expect(204);
-  //   // attempt #6
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration`)
-  //     .send(newUser6)
-  //     .expect(429);
-  // });
+  it("should return 429 for 6th attempt during 10 seconds", async () => {
+    const newUser1: { login: string; email: string; password: string } = {
+      login: "user1Login",
+      password: "user1Password",
+      email: "user1@email.com",
+    };
+    const newUser2: { login: string; email: string; password: string } = {
+      login: "user2Login",
+      password: "user2Password",
+      email: "user2@email.com",
+    };
+    const newUser3: { login: string; email: string; password: string } = {
+      login: "user3Login",
+      password: "user3Password",
+      email: "user3@email.com",
+    };
+    const newUser4: { login: string; email: string; password: string } = {
+      login: "user4Login",
+      password: "user4Password",
+      email: "user4@email.com",
+    };
+    const newUser5: { login: string; email: string; password: string } = {
+      login: "user5Login",
+      password: "user5Password",
+      email: "user5@email.com",
+    };
+    const newUser6: { login: string; email: string; password: string } = {
+      login: "user6Login",
+      password: "user6Password",
+      email: "user6@email.com",
+    };
+
+    // attempt #1
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration`)
+      .send(newUser1)
+      .expect(204);
+    // attempt #2
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration`)
+      .send(newUser2)
+      .expect(204);
+    // attempt #3
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration`)
+      .send(newUser3)
+      .expect(204);
+    // attempt #4
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration`)
+      .send(newUser4)
+      .expect(204);
+    // attempt #5
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration`)
+      .send(newUser5)
+      .expect(204);
+    // attempt #6
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration`)
+      .send(newUser6)
+      .expect(429);
+  });
 });
 
 describe("confirm user registration /registration-confirmation", () => {
@@ -180,9 +173,9 @@ describe("confirm user registration /registration-confirmation", () => {
     validConfirmationCode = await getUserRegistrationConfirmationCode(email);
   });
 
-  // beforeEach(async () => {
-  //   await deleteRateLimitsData();
-  // });
+  beforeEach(async () => {
+    await deleteRateLimitsData();
+  });
 
   afterEach(() => {
     global.Date = RealDate;
@@ -242,54 +235,54 @@ describe("confirm user registration /registration-confirmation", () => {
       .expect(204);
   });
 
-  // it("should return 429 for 6th attempt and 400 after waiting 10sec", async () => {
-  //   // attempt #1
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-  //     .send({ code: "00000" })
-  //     .expect(400);
-  //
-  //   // attempt #2
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-  //     .send({ code: "00000" })
-  //     .expect(400);
-  //
-  //   // attempt #3
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-  //     .send({ code: "00000" })
-  //     .expect(400);
-  //
-  //   // attempt #4
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-  //     .send({ code: "00000" })
-  //     .expect(400);
-  //
-  //   // attempt #5
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-  //     .send({ code: "00000" })
-  //     .expect(400);
-  //
-  //   // attempt #6
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-  //     .send({ code: "00000" })
-  //     .expect(429);
-  //
-  //   const dateInFuture = add(new Date(), {
-  //     seconds: 10,
-  //   });
-  //   mockDate(dateInFuture.toISOString());
-  //
-  //   // attempt #7 after waiting
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-  //     .send({ code: "00000" })
-  //     .expect(400);
-  // });
+  it("should return 429 for 6th attempt and 400 after waiting 10sec", async () => {
+    // attempt #1
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+      .send({ code: "00000" })
+      .expect(400);
+
+    // attempt #2
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+      .send({ code: "00000" })
+      .expect(400);
+
+    // attempt #3
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+      .send({ code: "00000" })
+      .expect(400);
+
+    // attempt #4
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+      .send({ code: "00000" })
+      .expect(400);
+
+    // attempt #5
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+      .send({ code: "00000" })
+      .expect(400);
+
+    // attempt #6
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+      .send({ code: "00000" })
+      .expect(429);
+
+    const dateInFuture = add(new Date(), {
+      seconds: 10,
+    });
+    mockDate(dateInFuture.toISOString());
+
+    // attempt #7 after waiting
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+      .send({ code: "00000" })
+      .expect(400);
+  });
 });
 
 describe("resend registration email /registration-email-resending", () => {
@@ -310,9 +303,9 @@ describe("resend registration email /registration-email-resending", () => {
       await getUserRegistrationConfirmationCode(user1Email);
   });
 
-  // beforeEach(async () => {
-  //   await deleteRateLimitsData();
-  // });
+  beforeEach(async () => {
+    await deleteRateLimitsData();
+  });
 
   afterEach(() => {
     global.Date = RealDate;
@@ -384,54 +377,54 @@ describe("resend registration email /registration-email-resending", () => {
     expect(newConfirmationCode).not.toBe(user2ValidConfirmationCode);
   });
 
-  // it("should return 429 for 6th request and 400 after waiting 10 sec", async () => {
-  //   // attempt #1
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-  //     .send({ email: "qwerty" })
-  //     .expect(400);
-  //
-  //   // attempt #2
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-  //     .send({ email: "qwerty" })
-  //     .expect(400);
-  //
-  //   // attempt #3
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-  //     .send({ email: "qwerty" })
-  //     .expect(400);
-  //
-  //   // attempt #4
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-  //     .send({ email: "qwerty" })
-  //     .expect(400);
-  //
-  //   // attempt #5
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-  //     .send({ email: "qwerty" })
-  //     .expect(400);
-  //
-  //   // attempt #6
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-  //     .send({ email: "qwerty" })
-  //     .expect(429);
-  //
-  //   const dateInFuture = add(new Date(), {
-  //     seconds: 10,
-  //   });
-  //   mockDate(dateInFuture.toISOString());
-  //
-  //   // attempt #7
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-  //     .send({ email: "qwerty" })
-  //     .expect(400);
-  // });
+  it("should return 429 for 6th request and 400 after waiting 10 sec", async () => {
+    // attempt #1
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+      .send({ email: "qwerty" })
+      .expect(400);
+
+    // attempt #2
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+      .send({ email: "qwerty" })
+      .expect(400);
+
+    // attempt #3
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+      .send({ email: "qwerty" })
+      .expect(400);
+
+    // attempt #4
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+      .send({ email: "qwerty" })
+      .expect(400);
+
+    // attempt #5
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+      .send({ email: "qwerty" })
+      .expect(400);
+
+    // attempt #6
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+      .send({ email: "qwerty" })
+      .expect(429);
+
+    const dateInFuture = add(new Date(), {
+      seconds: 10,
+    });
+    mockDate(dateInFuture.toISOString());
+
+    // attempt #7
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+      .send({ email: "qwerty" })
+      .expect(400);
+  });
 });
 
 describe("send password recovery code /password-recovery", () => {
@@ -443,9 +436,9 @@ describe("send password recovery code /password-recovery", () => {
     await registerTestUser([userEmail]);
   });
 
-  // beforeEach(async () => {
-  //   await deleteRateLimitsData();
-  // });
+  beforeEach(async () => {
+    await deleteRateLimitsData();
+  });
 
   afterEach(() => {
     global.Date = RealDate;
@@ -491,54 +484,54 @@ describe("send password recovery code /password-recovery", () => {
     ).toHaveBeenCalledTimes(1);
   });
 
-  // it("should return 429 for 6th request and 400 after waiting 10 sec", async () => {
-  //   // attempt #1
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-  //     .send({ email: "qwerty" })
-  //     .expect(400);
-  //
-  //   // attempt #2
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-  //     .send({ email: "qwerty" })
-  //     .expect(400);
-  //
-  //   // attempt #3
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-  //     .send({ email: "qwerty" })
-  //     .expect(400);
-  //
-  //   // attempt #4
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-  //     .send({ email: "qwerty" })
-  //     .expect(400);
-  //
-  //   // attempt #5
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-  //     .send({ email: "qwerty" })
-  //     .expect(400);
-  //
-  //   // attempt #6
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-  //     .send({ email: "qwerty" })
-  //     .expect(429);
-  //
-  //   const dateInFuture = add(new Date(), {
-  //     seconds: 10,
-  //   });
-  //   mockDate(dateInFuture.toISOString());
-  //
-  //   // attempt #7
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-  //     .send({ email: "qwerty" })
-  //     .expect(400);
-  // });
+  it("should return 429 for 6th request and 400 after waiting 10 sec", async () => {
+    // attempt #1
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+      .send({ email: "qwerty" })
+      .expect(400);
+
+    // attempt #2
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+      .send({ email: "qwerty" })
+      .expect(400);
+
+    // attempt #3
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+      .send({ email: "qwerty" })
+      .expect(400);
+
+    // attempt #4
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+      .send({ email: "qwerty" })
+      .expect(400);
+
+    // attempt #5
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+      .send({ email: "qwerty" })
+      .expect(400);
+
+    // attempt #6
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+      .send({ email: "qwerty" })
+      .expect(429);
+
+    const dateInFuture = add(new Date(), {
+      seconds: 10,
+    });
+    mockDate(dateInFuture.toISOString());
+
+    // attempt #7
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+      .send({ email: "qwerty" })
+      .expect(400);
+  });
 });
 
 describe("confirm password recovery /new-password", () => {
@@ -558,9 +551,9 @@ describe("confirm password recovery /new-password", () => {
     validPasswordRecoveryCode = await getUserPasswordRecoveryCode(userEmail);
   });
 
-  // beforeEach(async () => {
-  //   await deleteRateLimitsData();
-  // });
+  beforeEach(async () => {
+    await deleteRateLimitsData();
+  });
 
   afterEach(() => {
     global.Date = RealDate;
@@ -625,54 +618,54 @@ describe("confirm password recovery /new-password", () => {
     await req.post(`${SETTINGS.PATH.AUTH}/login`).send(authData).expect(200);
   });
 
-  // it("should return 429 for 6th request and 400 after waiting 10 sec", async () => {
-  //   // attempt #1
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
-  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
-  //     .expect(400);
-  //
-  //   // attempt #2
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
-  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
-  //     .expect(400);
-  //
-  //   // attempt #3
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
-  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
-  //     .expect(400);
-  //
-  //   // attempt #4
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
-  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
-  //     .expect(400);
-  //
-  //   // attempt #5
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
-  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
-  //     .expect(400);
-  //
-  //   // attempt #6
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
-  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
-  //     .expect(429);
-  //
-  //   const dateInFuture = add(new Date(), {
-  //     seconds: 10,
-  //   });
-  //   mockDate(dateInFuture.toISOString());
-  //
-  //   // attempt #7
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
-  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
-  //     .expect(400);
-  // });
+  it("should return 429 for 6th request and 400 after waiting 10 sec", async () => {
+    // attempt #1
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/new-password`)
+      .send({ newPassword: "qwerty", recoveryCode: "12345" })
+      .expect(400);
+
+    // attempt #2
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/new-password`)
+      .send({ newPassword: "qwerty", recoveryCode: "12345" })
+      .expect(400);
+
+    // attempt #3
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/new-password`)
+      .send({ newPassword: "qwerty", recoveryCode: "12345" })
+      .expect(400);
+
+    // attempt #4
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/new-password`)
+      .send({ newPassword: "qwerty", recoveryCode: "12345" })
+      .expect(400);
+
+    // attempt #5
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/new-password`)
+      .send({ newPassword: "qwerty", recoveryCode: "12345" })
+      .expect(400);
+
+    // attempt #6
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/new-password`)
+      .send({ newPassword: "qwerty", recoveryCode: "12345" })
+      .expect(429);
+
+    const dateInFuture = add(new Date(), {
+      seconds: 10,
+    });
+    mockDate(dateInFuture.toISOString());
+
+    // attempt #7
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/new-password`)
+      .send({ newPassword: "qwerty", recoveryCode: "12345" })
+      .expect(400);
+  });
 });
 
 describe("login user /login", () => {
@@ -685,9 +678,9 @@ describe("login user /login", () => {
     createdUser = (await createTestUsers({ password: userPassword }))[0];
   });
 
-  // beforeEach(async () => {
-  //   await deleteRateLimitsData();
-  // });
+  beforeEach(async () => {
+    await deleteRateLimitsData();
+  });
 
   afterEach(() => {
     global.Date = RealDate;
@@ -783,64 +776,64 @@ describe("login user /login", () => {
     });
   });
 
-  // it("should return 429 for 6th request during 10 seconds (rate limit) and 401 after waiting", async () => {
-  //   const nonExistentUser: { loginOrEmail: string; password: string } = {
-  //     loginOrEmail: "noExist",
-  //     password: userPassword,
-  //   };
-  //
-  //   // attempt #1
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/login`)
-  //     .send(nonExistentUser)
-  //     .expect(401);
-  //
-  //   // attempt #2
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/login`)
-  //     .send(nonExistentUser)
-  //     .expect(401);
-  //
-  //   // attempt #3
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/login`)
-  //     .send(nonExistentUser)
-  //     .expect(401);
-  //
-  //   // attempt #4
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/login`)
-  //     .send(nonExistentUser)
-  //     .expect(401);
-  //
-  //   // attempt #5
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/login`)
-  //     .send(nonExistentUser)
-  //     .expect(401);
-  //
-  //   // attempt #6
-  //   const errorRes = await req
-  //     .post(`${SETTINGS.PATH.AUTH}/login`)
-  //     .send(nonExistentUser)
-  //     .expect(429);
-  //
-  //   expect(errorRes.body.errorsMessages[0]).toEqual({
-  //     field: "",
-  //     message: "Too many requests",
-  //   });
-  //
-  //   const dateInFuture = add(new Date(), {
-  //     seconds: 11,
-  //   });
-  //   mockDate(dateInFuture.toISOString());
-  //
-  //   // attempt #7
-  //   await req
-  //     .post(`${SETTINGS.PATH.AUTH}/login`)
-  //     .send(nonExistentUser)
-  //     .expect(401);
-  // });
+  it("should return 429 for 6th request during 10 seconds (rate limit) and 401 after waiting", async () => {
+    const nonExistentUser: { loginOrEmail: string; password: string } = {
+      loginOrEmail: "noExist",
+      password: userPassword,
+    };
+
+    // attempt #1
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .send(nonExistentUser)
+      .expect(401);
+
+    // attempt #2
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .send(nonExistentUser)
+      .expect(401);
+
+    // attempt #3
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .send(nonExistentUser)
+      .expect(401);
+
+    // attempt #4
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .send(nonExistentUser)
+      .expect(401);
+
+    // attempt #5
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .send(nonExistentUser)
+      .expect(401);
+
+    // attempt #6
+    const errorRes = await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .send(nonExistentUser)
+      .expect(429);
+
+    expect(errorRes.body.errorsMessages[0]).toEqual({
+      field: "",
+      message: "Too many requests",
+    });
+
+    const dateInFuture = add(new Date(), {
+      seconds: 11,
+    });
+    mockDate(dateInFuture.toISOString());
+
+    // attempt #7
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .send(nonExistentUser)
+      .expect(401);
+  });
 });
 
 describe("check user /me", () => {

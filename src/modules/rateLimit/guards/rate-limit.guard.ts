@@ -1,8 +1,7 @@
-import { InjectModel } from "@nestjs/mongoose";
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 
 import { CoreConfig } from "../../../core/config/core.config";
-import { RateLimit, RateLimitModelType } from "../domain/rateLimit.entity";
+import { RateLimitEntity } from "../domain/rateLimit.entity.pg";
 import { DomainException } from "../../../core/exceptions/domain-exceptions";
 import { RateLimitRepository } from "../infrastructure/rateLimit.repository";
 import { DomainExceptionCode } from "../../../core/exceptions/domain-exception-codes";
@@ -12,7 +11,7 @@ export class RateLimitGuard implements CanActivate {
   constructor(
     private coreConfig: CoreConfig,
     private rateLimitRepository: RateLimitRepository,
-    @InjectModel(RateLimit.name) private RateLimitModel: RateLimitModelType,
+    private rateLimitEntity: RateLimitEntity,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -27,7 +26,7 @@ export class RateLimitGuard implements CanActivate {
     const date = Date.now();
 
     const dateForSearch = date - this.coreConfig.rateLimitPeriodInSec * 1000;
-    const sameRequestCount = await this.rateLimitRepository.getRequestCount({
+    const sameRequestCount = await this.rateLimitRepository.getRequestCount_pg({
       url,
       ip: ip!,
       date: dateForSearch,
@@ -46,12 +45,12 @@ export class RateLimitGuard implements CanActivate {
       });
     }
 
-    const newRequest = this.RateLimitModel.createInstance({
+    const newRequest = this.rateLimitEntity.createInstance({
       url,
       ip,
       date,
     });
-    await this.rateLimitRepository.save(newRequest);
+    await this.rateLimitRepository.addRequest_pg(newRequest);
 
     return true;
   }

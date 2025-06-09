@@ -7,6 +7,7 @@ import { SETTINGS } from "../../settings";
 import { createTestUsers } from "../users/helpers";
 import { getDeviceIdFromRefreshTokenCookie } from "./helpers";
 import { UserViewDto } from "../../modules/user-accounts/users/api/view-dto/users.view-dto";
+import { deleteRateLimitsData } from "../testing/helpers";
 
 describe("sessions /devices", () => {
   connectToTestDBAndClearRepositories();
@@ -33,6 +34,10 @@ describe("sessions /devices", () => {
       loginOrEmail: createdUser.login,
       password: userPassword,
     };
+  });
+
+  beforeEach(async () => {
+    await deleteRateLimitsData();
   });
 
   it("should return 401 for request without refresh token", async () => {
