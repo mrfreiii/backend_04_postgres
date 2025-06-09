@@ -58,7 +58,7 @@ export class UpdateUserPasswordCommandHandler
       dto.newPassword,
     );
 
-    await this.usersRepository.updateUserPassword({
+    await this.usersRepository.updateUserPassword_pg({
       userId: user.id,
       newPassword: passwordHash,
     });

@@ -106,30 +106,30 @@ export class AuthController {
     return this.commandBus.execute(new UpdateUserPasswordCommand(body));
   }
 
-  // @Post("login")
-  // @HttpCode(HttpStatus.OK)
-  // @UseGuards(RateLimitGuard, LocalAuthGuard)
-  // async loginUser(
-  //   @ExtractUserFromRequest() user: UserContextDto,
-  //   @Req() req: Request,
-  //   @Res({ passthrough: true }) response: Response,
-  // ): Promise<{
-  //   accessToken: string;
-  // }> {
-  //   const userAgent = req.headers["user-agent"];
-  //   const ip = req.ip;
-  //
-  //   const result = await this.commandBus.execute(
-  //     new LoginUserCommand({ userId: user.id, userAgent, ip }),
-  //   );
-  //
-  //   response.cookie("refreshToken", result.refreshToken, {
-  //     httpOnly: true,
-  //     secure: true,
-  //   });
-  //
-  //   return { accessToken: result.accessToken };
-  // }
+  @Post("login")
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RateLimitGuard, LocalAuthGuard)
+  async loginUser(
+    @ExtractUserFromRequest() user: UserContextDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<{
+    accessToken: string;
+  }> {
+    const userAgent = req.headers["user-agent"];
+    const ip = req.ip;
+
+    const result = await this.commandBus.execute(
+      new LoginUserCommand({ userId: user.id, userAgent, ip }),
+    );
+
+    response.cookie("refreshToken", result.refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+
+    return { accessToken: result.accessToken };
+  }
 
   // @ApiBearerAuth()
   // @Get("me")

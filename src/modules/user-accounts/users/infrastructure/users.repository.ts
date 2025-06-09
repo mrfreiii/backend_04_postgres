@@ -1,16 +1,17 @@
 import mongoose from "mongoose";
-import { validate as isValidUUID } from "uuid";
 import { DataSource } from "typeorm";
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
+import { validate as isValidUUID } from "uuid";
 import { InjectDataSource } from "@nestjs/typeorm";
 
 import { SETTINGS } from "../../../../settings";
+import { UserEntity } from "../domain/user.entity.pg";
+import { RegistrationEntity } from "../domain/registration.entity.pg";
 import { User, UserDocument, UserModelType } from "../domain/user.entity";
+import { PasswordRecoveryEntity } from "../domain/passwordRecovery.entity.pg";
 import { DomainException } from "../../../../core/exceptions/domain-exceptions";
 import { DomainExceptionCode } from "../../../../core/exceptions/domain-exception-codes";
-import { RegistrationEntity } from "../domain/registration.entity.pg";
-import { PasswordRecoveryEntity } from "../domain/passwordRecovery.entity.pg";
 
 @Injectable()
 export class UsersRepository {
@@ -75,7 +76,7 @@ export class UsersRepository {
     }
   }
 
-  async findByEmail_pg(email: string): Promise<User> {
+  async findByEmail_pg(email: string): Promise<UserEntity> {
     const query = `
        SELECT * FROM ${SETTINGS.TABLES.USERS} WHERE "email" = $1
     `;
@@ -97,7 +98,7 @@ export class UsersRepository {
     }
   }
 
-  async findOrNotFoundFail_pg(id: string): Promise<User> {
+  async findOrNotFoundFail_pg(id: string): Promise<UserEntity> {
     if (!isValidUUID(id)) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
@@ -348,7 +349,7 @@ export class UsersRepository {
     }
   }
 
-  async updateUserPassword(dto: {
+  async updateUserPassword_pg(dto: {
     userId: string;
     newPassword: string;
   }): Promise<void> {
@@ -374,9 +375,35 @@ export class UsersRepository {
     }
   }
 
-  async save(user: UserDocument) {
-    await user.save();
+  async findByLoginOrEmail_pg(dto: {
+    login: string;
+    email: string;
+  }): Promise<UserEntity> {
+    const query = `
+       SELECT * FROM ${SETTINGS.TABLES.USERS}
+        WHERE "login" = $1 OR "email" = $2
+    `;
+
+    try {
+      const result = await this.dataSource.query(query, [dto.login, dto.email]);
+      return result?.[0];
+    } catch {
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get user from db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to get user from db",
+          },
+        ],
+      });
+    }
   }
+
+  // async save(user: UserDocument) {
+  //   await user.save();
+  // }
 
   async findById(id: string): Promise<UserDocument | null> {
     const isObjectId = mongoose.Types.ObjectId.isValid(id);
@@ -421,10 +448,10 @@ export class UsersRepository {
   // findByLogin(login: string): Promise<UserDocument | null> {
   //   return this.UserModel.findOne({ login });
   // }
-
-  findByEmail(email: string): Promise<UserDocument | null> {
-    return this.UserModel.findOne({ email });
-  }
+  //
+  // findByEmail(email: string): Promise<UserDocument | null> {
+  //   return this.UserModel.findOne({ email });
+  // }
 
   findByLoginOrEmail({
     login,
@@ -451,15 +478,15 @@ export class UsersRepository {
     });
   }
 
-  findByConfirmationCode(
-    confirmationCode: string,
-  ): Promise<UserDocument | null> {
-    return this.UserModel.findOne({ confirmationCode });
-  }
-
-  findByPasswordRecoveryCode(
-    passwordRecoveryCode: string,
-  ): Promise<UserDocument | null> {
-    return this.UserModel.findOne({ passwordRecoveryCode });
-  }
+  // findByConfirmationCode(
+  //   confirmationCode: string,
+  // ): Promise<UserDocument | null> {
+  //   return this.UserModel.findOne({ confirmationCode });
+  // }
+  //
+  // findByPasswordRecoveryCode(
+  //   passwordRecoveryCode: string,
+  // ): Promise<UserDocument | null> {
+  //   return this.UserModel.findOne({ passwordRecoveryCode });
+  // }
 }

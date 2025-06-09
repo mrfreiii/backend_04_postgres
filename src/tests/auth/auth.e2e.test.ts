@@ -617,12 +617,12 @@ describe("confirm password recovery /new-password", () => {
       })
       .expect(204);
 
-    // const authData: { loginOrEmail: string; password: string } = {
-    //   loginOrEmail: userEmail,
-    //   password: newPassword,
-    // };
-    // TODO: вернуть после того как сделать логин
-    // await req.post(`${SETTINGS.PATH.AUTH}/login`).send(authData).expect(200);
+    const authData: { loginOrEmail: string; password: string } = {
+      loginOrEmail: userEmail,
+      password: newPassword,
+    };
+
+    await req.post(`${SETTINGS.PATH.AUTH}/login`).send(authData).expect(200);
   });
 
   // it("should return 429 for 6th request and 400 after waiting 10 sec", async () => {
@@ -675,173 +675,173 @@ describe("confirm password recovery /new-password", () => {
   // });
 });
 
-// describe("login user /login", () => {
-//   connectToTestDBAndClearRepositories();
-//
-//   const userPassword = "1234567890";
-//   let createdUser: UserViewDto;
-//
-//   beforeAll(async () => {
-//     createdUser = (await createTestUsers({ password: userPassword }))[0];
-//   });
-//
-//   beforeEach(async () => {
-//     await deleteRateLimitsData();
-//   });
-//
-//   afterEach(() => {
-//     global.Date = RealDate;
-//   });
-//
-//   // it("should return 400 for loginOrEmail and password are not string", async () => {
-//   //   const authData: { loginOrEmail: null; password: null } = {
-//   //     loginOrEmail: null,
-//   //     password: null,
-//   //   };
-//   //
-//   //   const res = await req
-//   //     .post(`${SETTINGS.PATH.AUTH}/login`)
-//   //     .send(authData)
-//   //     .expect(400);
-//   //
-//   //   expect(res.body.errorsMessages.length).toBe(2);
-//   //   expect(res.body.errorsMessages).toEqual([
-//   //     {
-//   //       field: "loginOrEmail",
-//   //       message: "value must be a string",
-//   //     },
-//   //     {
-//   //       field: "password",
-//   //       message: "value must be a string",
-//   //     },
-//   //   ]);
-//   // });
-//
-//   it("should login user by login", async () => {
-//     const authData: { loginOrEmail: string; password: string } = {
-//       loginOrEmail: createdUser.login,
-//       password: userPassword,
-//     };
-//
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/login`)
-//       .send(authData)
-//       .expect(200);
-//
-//     const refreshToken = (res.header["set-cookie"] as unknown as Array<string>)
-//       ?.find((header) => header.startsWith("refreshToken="))
-//       ?.split("=")[1];
-//
-//     expect(res.body).toEqual({ accessToken: expect.any(String) });
-//     expect(refreshToken).toStrictEqual(expect.any(String));
-//   });
-//
-//   it("should login user by email", async () => {
-//     const authData: { loginOrEmail: string; password: string } = {
-//       loginOrEmail: createdUser.email,
-//       password: userPassword,
-//     };
-//
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/login`)
-//       .send(authData)
-//       .expect(200);
-//     expect(res.body).toEqual({ accessToken: expect.any(String) });
-//   });
-//
-//   it("should return 401 for invalid password", async () => {
-//     const authData: { loginOrEmail: string; password: string } = {
-//       loginOrEmail: createdUser.email,
-//       password: "invalid password",
-//     };
-//
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/login`)
-//       .send(authData)
-//       .expect(401);
-//
-//     expect(res.body.errorsMessages[0]).toEqual({
-//       field: "",
-//       message: "Invalid username or password",
-//     });
-//   });
-//
-//   it("should return 401 for non existent user", async () => {
-//     const authData: { loginOrEmail: string; password: string } = {
-//       loginOrEmail: "noExist",
-//       password: userPassword,
-//     };
-//
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/login`)
-//       .send(authData)
-//       .expect(401);
-//
-//     expect(res.body.errorsMessages[0]).toEqual({
-//       field: "",
-//       message: "Invalid username or password",
-//     });
-//   });
-//
-//   it("should return 429 for 6th request during 10 seconds (rate limit) and 401 after waiting", async () => {
-//     const nonExistentUser: { loginOrEmail: string; password: string } = {
-//       loginOrEmail: "noExist",
-//       password: userPassword,
-//     };
-//
-//     // attempt #1
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/login`)
-//       .send(nonExistentUser)
-//       .expect(401);
-//
-//     // attempt #2
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/login`)
-//       .send(nonExistentUser)
-//       .expect(401);
-//
-//     // attempt #3
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/login`)
-//       .send(nonExistentUser)
-//       .expect(401);
-//
-//     // attempt #4
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/login`)
-//       .send(nonExistentUser)
-//       .expect(401);
-//
-//     // attempt #5
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/login`)
-//       .send(nonExistentUser)
-//       .expect(401);
-//
-//     // attempt #6
-//     const errorRes = await req
-//       .post(`${SETTINGS.PATH.AUTH}/login`)
-//       .send(nonExistentUser)
-//       .expect(429);
-//
-//     expect(errorRes.body.errorsMessages[0]).toEqual({
-//       field: "",
-//       message: "Too many requests",
-//     });
-//
-//     const dateInFuture = add(new Date(), {
-//       seconds: 11,
-//     });
-//     mockDate(dateInFuture.toISOString());
-//
-//     // attempt #7
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/login`)
-//       .send(nonExistentUser)
-//       .expect(401);
-//   });
-// });
+describe("login user /login", () => {
+  connectToTestDBAndClearRepositories();
+
+  const userPassword = "1234567890";
+  let createdUser: UserViewDto;
+
+  beforeAll(async () => {
+    createdUser = (await createTestUsers({ password: userPassword }))[0];
+  });
+
+  // beforeEach(async () => {
+  //   await deleteRateLimitsData();
+  // });
+
+  afterEach(() => {
+    global.Date = RealDate;
+  });
+
+  // it("should return 400 for loginOrEmail and password are not string", async () => {
+  //   const authData: { loginOrEmail: null; password: null } = {
+  //     loginOrEmail: null,
+  //     password: null,
+  //   };
+  //
+  //   const res = await req
+  //     .post(`${SETTINGS.PATH.AUTH}/login`)
+  //     .send(authData)
+  //     .expect(400);
+  //
+  //   expect(res.body.errorsMessages.length).toBe(2);
+  //   expect(res.body.errorsMessages).toEqual([
+  //     {
+  //       field: "loginOrEmail",
+  //       message: "value must be a string",
+  //     },
+  //     {
+  //       field: "password",
+  //       message: "value must be a string",
+  //     },
+  //   ]);
+  // });
+
+  it("should login user by login", async () => {
+    const authData: { loginOrEmail: string; password: string } = {
+      loginOrEmail: createdUser.login,
+      password: userPassword,
+    };
+
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .send(authData)
+      .expect(200);
+
+    const refreshToken = (res.header["set-cookie"] as unknown as Array<string>)
+      ?.find((header) => header.startsWith("refreshToken="))
+      ?.split("=")[1];
+
+    expect(res.body).toEqual({ accessToken: expect.any(String) });
+    expect(refreshToken).toStrictEqual(expect.any(String));
+  });
+
+  it("should login user by email", async () => {
+    const authData: { loginOrEmail: string; password: string } = {
+      loginOrEmail: createdUser.email,
+      password: userPassword,
+    };
+
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .send(authData)
+      .expect(200);
+    expect(res.body).toEqual({ accessToken: expect.any(String) });
+  });
+
+  it("should return 401 for invalid password", async () => {
+    const authData: { loginOrEmail: string; password: string } = {
+      loginOrEmail: createdUser.email,
+      password: "invalid password",
+    };
+
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .send(authData)
+      .expect(401);
+
+    expect(res.body.errorsMessages[0]).toEqual({
+      field: "",
+      message: "Invalid username or password",
+    });
+  });
+
+  it("should return 401 for non existent user", async () => {
+    const authData: { loginOrEmail: string; password: string } = {
+      loginOrEmail: "noExist",
+      password: userPassword,
+    };
+
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .send(authData)
+      .expect(401);
+
+    expect(res.body.errorsMessages[0]).toEqual({
+      field: "",
+      message: "Invalid username or password",
+    });
+  });
+
+  // it("should return 429 for 6th request during 10 seconds (rate limit) and 401 after waiting", async () => {
+  //   const nonExistentUser: { loginOrEmail: string; password: string } = {
+  //     loginOrEmail: "noExist",
+  //     password: userPassword,
+  //   };
+  //
+  //   // attempt #1
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/login`)
+  //     .send(nonExistentUser)
+  //     .expect(401);
+  //
+  //   // attempt #2
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/login`)
+  //     .send(nonExistentUser)
+  //     .expect(401);
+  //
+  //   // attempt #3
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/login`)
+  //     .send(nonExistentUser)
+  //     .expect(401);
+  //
+  //   // attempt #4
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/login`)
+  //     .send(nonExistentUser)
+  //     .expect(401);
+  //
+  //   // attempt #5
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/login`)
+  //     .send(nonExistentUser)
+  //     .expect(401);
+  //
+  //   // attempt #6
+  //   const errorRes = await req
+  //     .post(`${SETTINGS.PATH.AUTH}/login`)
+  //     .send(nonExistentUser)
+  //     .expect(429);
+  //
+  //   expect(errorRes.body.errorsMessages[0]).toEqual({
+  //     field: "",
+  //     message: "Too many requests",
+  //   });
+  //
+  //   const dateInFuture = add(new Date(), {
+  //     seconds: 11,
+  //   });
+  //   mockDate(dateInFuture.toISOString());
+  //
+  //   // attempt #7
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/login`)
+  //     .send(nonExistentUser)
+  //     .expect(401);
+  // });
+});
 
 // describe("check user /me", () => {
 //   connectToTestDBAndClearRepositories();

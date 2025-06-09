@@ -2,45 +2,52 @@ import { UsersConfig } from "./users/config/users.config";
 
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-
 import { JwtModule, JwtService } from "@nestjs/jwt";
+
 import {
   ACCESS_TOKEN_STRATEGY_INJECT_TOKEN,
   REFRESH_TOKEN_STRATEGY_INJECT_TOKEN,
 } from "./constants/auth-tokens.inject-constants";
-import { User, UserSchema } from "./users/domain/user.entity";
-import { AuthController } from "./auth/api/auth.controller";
-import { UsersController } from "./users/api/users.controller";
-import { CryptoService } from "./users/application/crypto.service";
-import { UsersExternalService } from "./users/application/users.external-service";
-import { UsersRepository } from "./users/infrastructure/users.repository";
-import { AuthQueryRepository } from "./auth/infrastructure/query/auth.query-repository";
-import { UsersQueryRepository } from "./users/infrastructure/query/users.query-repository";
-import { UsersExternalQueryRepository } from "./users/infrastructure/external-query/users.external-query-repository";
 import { NotificationsModule } from "../notifications/notifications.module";
-import { JwtStrategy } from "./guards/bearer/jwt.strategy";
-import { LocalStrategy } from "./guards/local/local.strategy";
-import { LoginUserCommandHandler } from "./auth/application/usecases/login-user.usecase";
-import { ValidateUserCommandHandler } from "./auth/application/usecases/validate-user.usecase";
-import { CreateUserCommandHandler } from "./users/application/usecases/create-user.usecase";
-import { DeleteUserCommandHandler } from "./users/application/usecases/delete-user.usecase";
-import { RegisterUserCommandHandler } from "./users/application/usecases/register-user.usecase";
-import { ConfirmUserRegistrationCommandHandler } from "./users/application/usecases/confirm-user-registration.usecase";
-import { ResendUserRegistrationEmailCommandHandler } from "./users/application/usecases/resend-user-registration-email.usecase";
-import { SendUserPasswordRecoveryCodeCommandHandler } from "./users/application/usecases/send-user-password-recovery-code.usecase";
-import { UpdateUserPasswordCommandHandler } from "./users/application/usecases/update-user-password.usecase";
-import { Session, SessionSchema } from "./sessions/domain/session.entity";
-import { SessionsRepository } from "./sessions/infrastructure/sessions.repository";
-import { TokenGenerationService } from "./auth/application/tokenGeneration.service";
-import { RefreshTokenCommandHandler } from "./auth/application/usecases/refresh-token.usecase";
-import { LogoutUserCommandHandler } from "./auth/application/usecases/logout-user.usecase";
-import { SessionsController } from "./sessions/api/sessions.controller";
-import { SessionsQueryRepository } from "./sessions/infrastructure/query/sessions.query-repository";
-import { DeleteSessionByIdCommandHandler } from "./sessions/application/usecases/delete-session-by-id.usecase";
-import { DeleteAllOtherSessionCommandHandler } from "./sessions/application/usecases/delete-all-other-sessions.usecase";
+
 import { UserEntity } from "./users/domain/user.entity.pg";
+import { User, UserSchema } from "./users/domain/user.entity";
+import { SessionEntity } from "./sessions/domain/session.entity.pg";
+import { Session, SessionSchema } from "./sessions/domain/session.entity";
 import { RegistrationEntity } from "./users/domain/registration.entity.pg";
 import { PasswordRecoveryEntity } from "./users/domain/passwordRecovery.entity.pg";
+
+import { AuthController } from "./auth/api/auth.controller";
+import { UsersController } from "./users/api/users.controller";
+import { SessionsController } from "./sessions/api/sessions.controller";
+
+import { CryptoService } from "./users/application/crypto.service";
+import { UsersExternalService } from "./users/application/users.external-service";
+import { TokenGenerationService } from "./auth/application/tokenGeneration.service";
+
+import { UsersRepository } from "./users/infrastructure/users.repository";
+import { SessionsRepository } from "./sessions/infrastructure/sessions.repository";
+import { AuthQueryRepository } from "./auth/infrastructure/query/auth.query-repository";
+import { UsersQueryRepository } from "./users/infrastructure/query/users.query-repository";
+import { SessionsQueryRepository } from "./sessions/infrastructure/query/sessions.query-repository";
+import { UsersExternalQueryRepository } from "./users/infrastructure/external-query/users.external-query-repository";
+
+import { JwtStrategy } from "./guards/bearer/jwt.strategy";
+import { LocalStrategy } from "./guards/local/local.strategy";
+
+import { LoginUserCommandHandler } from "./auth/application/usecases/login-user.usecase";
+import { CreateUserCommandHandler } from "./users/application/usecases/create-user.usecase";
+import { LogoutUserCommandHandler } from "./auth/application/usecases/logout-user.usecase";
+import { DeleteUserCommandHandler } from "./users/application/usecases/delete-user.usecase";
+import { ValidateUserCommandHandler } from "./auth/application/usecases/validate-user.usecase";
+import { RegisterUserCommandHandler } from "./users/application/usecases/register-user.usecase";
+import { RefreshTokenCommandHandler } from "./auth/application/usecases/refresh-token.usecase";
+import { UpdateUserPasswordCommandHandler } from "./users/application/usecases/update-user-password.usecase";
+import { DeleteSessionByIdCommandHandler } from "./sessions/application/usecases/delete-session-by-id.usecase";
+import { ConfirmUserRegistrationCommandHandler } from "./users/application/usecases/confirm-user-registration.usecase";
+import { DeleteAllOtherSessionCommandHandler } from "./sessions/application/usecases/delete-all-other-sessions.usecase";
+import { ResendUserRegistrationEmailCommandHandler } from "./users/application/usecases/resend-user-registration-email.usecase";
+import { SendUserPasswordRecoveryCodeCommandHandler } from "./users/application/usecases/send-user-password-recovery-code.usecase";
 
 const commandHandlers = [
   ValidateUserCommandHandler,
@@ -93,6 +100,15 @@ const repos = [
   SessionsQueryRepository,
 ];
 
+const strategies = [LocalStrategy, JwtStrategy];
+
+const entities = [
+  UserEntity,
+  RegistrationEntity,
+  PasswordRecoveryEntity,
+  SessionEntity,
+];
+
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -107,11 +123,8 @@ const repos = [
     ...commandHandlers,
     ...services,
     ...repos,
-    LocalStrategy,
-    JwtStrategy,
-    UserEntity,
-    RegistrationEntity,
-    PasswordRecoveryEntity,
+    ...strategies,
+    ...entities,
   ],
   exports: [UsersExternalQueryRepository, UsersExternalService],
 })

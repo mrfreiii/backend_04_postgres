@@ -4,11 +4,11 @@ import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class RegistrationEntity {
-  constructor() {}
-
   confirmationCode: string;
   codeExpirationDate: number;
   userId: string;
+
+  constructor() {}
 
   createInstance(userId: string): RegistrationEntity {
     const registrationInfo = new RegistrationEntity();

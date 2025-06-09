@@ -1,12 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
-import { InjectModel } from "@nestjs/mongoose";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 
-import {
-  Session,
-  SessionModelType,
-} from "../../../sessions/domain/session.entity";
 import { TokenGenerationService } from "../tokenGeneration.service";
+import { SessionEntity } from "../../../sessions/domain/session.entity.pg";
 import { LoginUserInputDto, LoginUserOutputDto } from "../dto/login-user.dto";
 import { SessionsRepository } from "../../../sessions/infrastructure/sessions.repository";
 
@@ -19,9 +15,9 @@ export class LoginUserCommandHandler
   implements ICommandHandler<LoginUserCommand, LoginUserOutputDto>
 {
   constructor(
-    @InjectModel(Session.name) private SessionModel: SessionModelType,
     private sessionsRepository: SessionsRepository,
     private tokenGenerationService: TokenGenerationService,
+    private sessionEntity: SessionEntity,
   ) {}
 
   async execute({ dto }: LoginUserCommand): Promise<LoginUserOutputDto> {
@@ -34,14 +30,14 @@ export class LoginUserCommandHandler
       deviceId,
     });
 
-    const session = this.SessionModel.createInstance({
+    const session = this.sessionEntity.createInstance({
       userId,
       deviceId,
       userAgent,
       ip,
       refreshToken,
     });
-    await this.sessionsRepository.save(session);
+    await this.sessionsRepository.createSession_pg(session);
 
     return Promise.resolve({
       accessToken,

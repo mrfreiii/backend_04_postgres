@@ -19,7 +19,7 @@ export class ValidateUserCommandHandler
   ) {}
 
   async execute({ dto }: ValidateUserCommand): Promise<UserContextDto | null> {
-    const user = await this.usersRepository.findByLoginOrEmail({
+    const user = await this.usersRepository.findByLoginOrEmail_pg({
       login: dto.loginOrEmail,
       email: dto.loginOrEmail,
     });
