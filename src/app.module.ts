@@ -47,6 +47,7 @@ import { DomainHttpExceptionsFilter } from "./core/exceptions/filters/domain-exc
           database,
           autoLoadEntities: false,
           synchronize: false,
+          ssl: true,
         };
       },
       inject: [CoreConfig],
