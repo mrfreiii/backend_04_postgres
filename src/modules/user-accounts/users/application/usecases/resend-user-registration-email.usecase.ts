@@ -4,6 +4,7 @@ import { EmailService } from "../../../../notifications/application/email.servic
 import { UsersRepository } from "../../infrastructure/users.repository";
 import { DomainException } from "../../../../../core/exceptions/domain-exceptions";
 import { DomainExceptionCode } from "../../../../../core/exceptions/domain-exception-codes";
+import { RegistrationEntity } from "../../domain/registration.entity.pg";
 
 export class ResendUserRegistrationEmailCommand {
   constructor(
@@ -21,6 +22,7 @@ export class ResendUserRegistrationEmailCommandHandler
   constructor(
     private usersRepository: UsersRepository,
     private emailService: EmailService,
+    private registrationEntity: RegistrationEntity,
   ) {}
 
   async execute({
@@ -28,7 +30,7 @@ export class ResendUserRegistrationEmailCommandHandler
   }: ResendUserRegistrationEmailCommand): Promise<void> {
     const { email, currentURL } = inputData;
 
-    const user = await this.usersRepository.findByEmail(email);
+    const user = await this.usersRepository.findByEmail_pg(email);
     if (!user) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
@@ -55,13 +57,16 @@ export class ResendUserRegistrationEmailCommandHandler
       });
     }
 
-    const confirmationCode = user.setConfirmationCode();
-    await this.usersRepository.save(user);
+    const registrationInfo = this.registrationEntity.createInstance(user.id);
+
+    await this.usersRepository.updateRegistrationConfirmationCode_pg(
+      registrationInfo,
+    );
 
     this.emailService
       .sendEmailWithConfirmationCode({
         email: user.email,
-        confirmationCode,
+        confirmationCode: registrationInfo.confirmationCode,
         currentURL,
       })
       .catch(console.error);

@@ -69,35 +69,35 @@ export class AuthController {
     );
   }
 
-  // @Post("registration-email-resending")
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // @UseGuards(RateLimitGuard)
-  // async resendRegistrationEmail(
-  //   @Req() req: Request,
-  //   @Body() body: ResendUserRegistrationEmailInputDto,
-  // ) {
-  //   return this.commandBus.execute(
-  //     new ResendUserRegistrationEmailCommand({
-  //       email: body.email,
-  //       currentURL: `${req.protocol + "://" + req.get("host")}`,
-  //     }),
-  //   );
-  // }
+  @Post("registration-email-resending")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(RateLimitGuard)
+  async resendRegistrationEmail(
+    @Req() req: Request,
+    @Body() body: ResendUserRegistrationEmailInputDto,
+  ) {
+    return this.commandBus.execute(
+      new ResendUserRegistrationEmailCommand({
+        email: body.email,
+        currentURL: `${req.protocol + "://" + req.get("host")}`,
+      }),
+    );
+  }
 
-  // @Post("password-recovery")
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // @UseGuards(RateLimitGuard)
-  // async sendPasswordRecoveryCode(
-  //   @Req() req: Request,
-  //   @Body() body: SendPasswordRecoveryCodeInputDto,
-  // ) {
-  //   return this.commandBus.execute(
-  //     new SendUserPasswordRecoveryCodeCommand({
-  //       email: body.email,
-  //       currentURL: `${req.protocol + "://" + req.get("host")}`,
-  //     }),
-  //   );
-  // }
+  @Post("password-recovery")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(RateLimitGuard)
+  async sendPasswordRecoveryCode(
+    @Req() req: Request,
+    @Body() body: SendPasswordRecoveryCodeInputDto,
+  ) {
+    return this.commandBus.execute(
+      new SendUserPasswordRecoveryCodeCommand({
+        email: body.email,
+        currentURL: `${req.protocol + "://" + req.get("host")}`,
+      }),
+    );
+  }
 
   // @Post("new-password")
   // @HttpCode(HttpStatus.NO_CONTENT)

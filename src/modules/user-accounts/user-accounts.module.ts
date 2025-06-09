@@ -40,6 +40,7 @@ import { DeleteSessionByIdCommandHandler } from "./sessions/application/usecases
 import { DeleteAllOtherSessionCommandHandler } from "./sessions/application/usecases/delete-all-other-sessions.usecase";
 import { UserEntity } from "./users/domain/user.entity.pg";
 import { RegistrationEntity } from "./users/domain/registration.entity.pg";
+import { PasswordRecoveryEntity } from "./users/domain/passwordRecovery.entity.pg";
 
 const commandHandlers = [
   ValidateUserCommandHandler,
@@ -110,6 +111,7 @@ const repos = [
     JwtStrategy,
     UserEntity,
     RegistrationEntity,
+    PasswordRecoveryEntity,
   ],
   exports: [UsersExternalQueryRepository, UsersExternalService],
 })

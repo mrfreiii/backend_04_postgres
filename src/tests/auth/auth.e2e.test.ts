@@ -291,242 +291,254 @@ describe("confirm user registration /registration-confirmation", () => {
   // });
 });
 
-// describe("resend registration email /registration-email-resending", () => {
-//   connectToTestDBAndClearRepositories();
-//
-//   const user1Email = "user1@email.com";
-//   const user2Email = "user2@email.com";
-//
-//   beforeAll(async () => {
-//     await registerTestUser([user1Email, user2Email]);
-//   });
-//
-//   beforeEach(async () => {
-//     await deleteRateLimitsData();
-//   });
-//
-//   afterEach(() => {
-//     global.Date = RealDate;
-//   });
-//
-//   it("should return 400 for invalid email format", async () => {
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//
-//     expect(res.body.errorsMessages.length).toBe(1);
-//     expect(res.body.errorsMessages).toEqual([
-//       {
-//         field: "email",
-//         message: "email must be an email; Received value: qwerty",
-//       },
-//     ]);
-//   });
-//
-//   it("should return 400 for unregistered email", async () => {
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-//       .send({ email: "qwerty@test.com" })
-//       .expect(400);
-//
-//     expect(res.body.errorsMessages.length).toBe(1);
-//     expect(res.body.errorsMessages).toEqual([
-//       {
-//         field: "email",
-//         message: "User not found",
-//       },
-//     ]);
-//   });
-//
-//   it("should return 400 for already confirmed email", async () => {
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
-//       .send({ code: validConfirmationOrRecoveryCode })
-//       .expect(204);
-//
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-//       .send({ email: user1Email })
-//       .expect(400);
-//
-//     expect(res.body.errorsMessages.length).toBe(1);
-//     expect(res.body.errorsMessages).toEqual([
-//       {
-//         field: "email",
-//         message: "Email already confirmed",
-//       },
-//     ]);
-//   });
-//
-//   it("should resend email", async () => {
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-//       .send({ email: user2Email })
-//       .expect(204);
-//
-//     expect(emailServiceMock.sendEmailWithConfirmationCode).toHaveBeenCalled();
-//     expect(
-//       emailServiceMock.sendEmailWithConfirmationCode,
-//     ).toHaveBeenCalledTimes(3);
-//   });
-//
-//   it("should return 429 for 6th request and 400 after waiting 10 sec", async () => {
-//     // attempt #1
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//
-//     // attempt #2
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//
-//     // attempt #3
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//
-//     // attempt #4
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//
-//     // attempt #5
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//
-//     // attempt #6
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-//       .send({ email: "qwerty" })
-//       .expect(429);
-//
-//     const dateInFuture = add(new Date(), {
-//       seconds: 10,
-//     });
-//     mockDate(dateInFuture.toISOString());
-//
-//     // attempt #7
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//   });
-// });
+describe("resend registration email /registration-email-resending", () => {
+  connectToTestDBAndClearRepositories();
 
-// describe("send password recovery code /password-recovery", () => {
-//   connectToTestDBAndClearRepositories();
-//
-//   const userEmail = "user1@email.com";
-//
-//   beforeAll(async () => {
-//     await registerTestUser([userEmail]);
-//   });
-//
-//   beforeEach(async () => {
-//     await deleteRateLimitsData();
-//   });
-//
-//   afterEach(() => {
-//     global.Date = RealDate;
-//   });
-//
-//   it("should return 400 for invalid email format", async () => {
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//
-//     expect(res.body.errorsMessages.length).toBe(1);
-//     expect(res.body.errorsMessages).toEqual([
-//       {
-//         field: "email",
-//         message: "email must be an email; Received value: qwerty",
-//       },
-//     ]);
-//   });
-//
-//   it("should return 204 for unregistered email", async () => {
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-//       .send({ email: "qwerty@test.com" })
-//       .expect(204);
-//
-//     expect(
-//       emailServiceMock.sendEmailWithPasswordRecoveryCode,
-//     ).not.toHaveBeenCalled();
-//   });
-//
-//   it("should send email", async () => {
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-//       .send({ email: userEmail })
-//       .expect(204);
-//
-//     expect(
-//       emailServiceMock.sendEmailWithPasswordRecoveryCode,
-//     ).toHaveBeenCalled();
-//     expect(
-//       emailServiceMock.sendEmailWithPasswordRecoveryCode,
-//     ).toHaveBeenCalledTimes(1);
-//   });
-//
-//   it("should return 429 for 6th request and 400 after waiting 10 sec", async () => {
-//     // attempt #1
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//
-//     // attempt #2
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//
-//     // attempt #3
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//
-//     // attempt #4
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//
-//     // attempt #5
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//
-//     // attempt #6
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-//       .send({ email: "qwerty" })
-//       .expect(429);
-//
-//     const dateInFuture = add(new Date(), {
-//       seconds: 10,
-//     });
-//     mockDate(dateInFuture.toISOString());
-//
-//     // attempt #7
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-//       .send({ email: "qwerty" })
-//       .expect(400);
-//   });
-// });
+  const user1Email = "user1@email.com";
+  const user2Email = "user2@email.com";
+
+  let user1ValidConfirmationCode: string;
+  let user2ValidConfirmationCode: string;
+
+  beforeAll(async () => {
+    await registerTestUser([user1Email, user2Email]);
+
+    user1ValidConfirmationCode =
+      await getUserRegistrationConfirmationCode(user1Email);
+    user2ValidConfirmationCode =
+      await getUserRegistrationConfirmationCode(user1Email);
+  });
+
+  // beforeEach(async () => {
+  //   await deleteRateLimitsData();
+  // });
+
+  afterEach(() => {
+    global.Date = RealDate;
+  });
+
+  it("should return 400 for invalid email format", async () => {
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+      .send({ email: "qwerty" })
+      .expect(400);
+
+    expect(res.body.errorsMessages.length).toBe(1);
+    expect(res.body.errorsMessages).toEqual([
+      {
+        field: "email",
+        message: "email must be an email; Received value: qwerty",
+      },
+    ]);
+  });
+
+  it("should return 400 for unregistered email", async () => {
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+      .send({ email: "qwerty@test.com" })
+      .expect(400);
+
+    expect(res.body.errorsMessages.length).toBe(1);
+    expect(res.body.errorsMessages).toEqual([
+      {
+        field: "email",
+        message: "User not found",
+      },
+    ]);
+  });
+
+  it("should return 400 for already confirmed email", async () => {
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-confirmation`)
+      .send({ code: user1ValidConfirmationCode })
+      .expect(204);
+
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+      .send({ email: user1Email })
+      .expect(400);
+
+    expect(res.body.errorsMessages.length).toBe(1);
+    expect(res.body.errorsMessages).toEqual([
+      {
+        field: "email",
+        message: "Email already confirmed",
+      },
+    ]);
+  });
+
+  it("should resend email", async () => {
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+      .send({ email: user2Email })
+      .expect(204);
+
+    expect(emailServiceMock.sendEmailWithConfirmationCode).toHaveBeenCalled();
+    expect(
+      emailServiceMock.sendEmailWithConfirmationCode,
+    ).toHaveBeenCalledTimes(3);
+
+    const newConfirmationCode =
+      await getUserRegistrationConfirmationCode(user2Email);
+    expect(newConfirmationCode).not.toBe(user2ValidConfirmationCode);
+  });
+
+  // it("should return 429 for 6th request and 400 after waiting 10 sec", async () => {
+  //   // attempt #1
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+  //     .send({ email: "qwerty" })
+  //     .expect(400);
+  //
+  //   // attempt #2
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+  //     .send({ email: "qwerty" })
+  //     .expect(400);
+  //
+  //   // attempt #3
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+  //     .send({ email: "qwerty" })
+  //     .expect(400);
+  //
+  //   // attempt #4
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+  //     .send({ email: "qwerty" })
+  //     .expect(400);
+  //
+  //   // attempt #5
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+  //     .send({ email: "qwerty" })
+  //     .expect(400);
+  //
+  //   // attempt #6
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+  //     .send({ email: "qwerty" })
+  //     .expect(429);
+  //
+  //   const dateInFuture = add(new Date(), {
+  //     seconds: 10,
+  //   });
+  //   mockDate(dateInFuture.toISOString());
+  //
+  //   // attempt #7
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/registration-email-resending`)
+  //     .send({ email: "qwerty" })
+  //     .expect(400);
+  // });
+});
+
+describe("send password recovery code /password-recovery", () => {
+  connectToTestDBAndClearRepositories();
+
+  const userEmail = "user1@email.com";
+
+  beforeAll(async () => {
+    await registerTestUser([userEmail]);
+  });
+
+  // beforeEach(async () => {
+  //   await deleteRateLimitsData();
+  // });
+
+  afterEach(() => {
+    global.Date = RealDate;
+  });
+
+  it("should return 400 for invalid email format", async () => {
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+      .send({ email: "qwerty" })
+      .expect(400);
+
+    expect(res.body.errorsMessages.length).toBe(1);
+    expect(res.body.errorsMessages).toEqual([
+      {
+        field: "email",
+        message: "email must be an email; Received value: qwerty",
+      },
+    ]);
+  });
+
+  it("should return 204 for unregistered email", async () => {
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+      .send({ email: "qwerty@test.com" })
+      .expect(204);
+
+    expect(
+      emailServiceMock.sendEmailWithPasswordRecoveryCode,
+    ).not.toHaveBeenCalled();
+  });
+
+  it("should send email", async () => {
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+      .send({ email: userEmail })
+      .expect(204);
+
+    expect(
+      emailServiceMock.sendEmailWithPasswordRecoveryCode,
+    ).toHaveBeenCalled();
+    expect(
+      emailServiceMock.sendEmailWithPasswordRecoveryCode,
+    ).toHaveBeenCalledTimes(1);
+  });
+
+  // it("should return 429 for 6th request and 400 after waiting 10 sec", async () => {
+  //   // attempt #1
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+  //     .send({ email: "qwerty" })
+  //     .expect(400);
+  //
+  //   // attempt #2
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+  //     .send({ email: "qwerty" })
+  //     .expect(400);
+  //
+  //   // attempt #3
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+  //     .send({ email: "qwerty" })
+  //     .expect(400);
+  //
+  //   // attempt #4
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+  //     .send({ email: "qwerty" })
+  //     .expect(400);
+  //
+  //   // attempt #5
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+  //     .send({ email: "qwerty" })
+  //     .expect(400);
+  //
+  //   // attempt #6
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+  //     .send({ email: "qwerty" })
+  //     .expect(429);
+  //
+  //   const dateInFuture = add(new Date(), {
+  //     seconds: 10,
+  //   });
+  //   mockDate(dateInFuture.toISOString());
+  //
+  //   // attempt #7
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+  //     .send({ email: "qwerty" })
+  //     .expect(400);
+  // });
+});
 
 // describe("confirm password recovery /new-password", () => {
 //   connectToTestDBAndClearRepositories();

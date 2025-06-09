@@ -2,6 +2,7 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 
 import { EmailService } from "../../../../notifications/application/email.service";
 import { UsersRepository } from "../../infrastructure/users.repository";
+import { PasswordRecoveryEntity } from "../../domain/passwordRecovery.entity.pg";
 
 export class SendUserPasswordRecoveryCodeCommand {
   constructor(
@@ -19,6 +20,7 @@ export class SendUserPasswordRecoveryCodeCommandHandler
   constructor(
     private usersRepository: UsersRepository,
     private emailService: EmailService,
+    private passwordRecoveryEntity: PasswordRecoveryEntity,
   ) {}
 
   async execute({
@@ -26,18 +28,18 @@ export class SendUserPasswordRecoveryCodeCommandHandler
   }: SendUserPasswordRecoveryCodeCommand): Promise<void> {
     const { email, currentURL } = inputData;
 
-    const user = await this.usersRepository.findByEmail(email);
+    const user = await this.usersRepository.findByEmail_pg(email);
     if (!user) {
       return;
     }
 
-    const recoveryCode = user.setPasswordRecoveryCode();
-    await this.usersRepository.save(user);
+    const recoveryInfo = this.passwordRecoveryEntity.createInstance(user.id);
+    await this.usersRepository.setPasswordRecoveryCode_pg(recoveryInfo);
 
     this.emailService
       .sendEmailWithPasswordRecoveryCode({
         email: user.email,
-        recoveryCode,
+        recoveryCode: recoveryInfo.recoveryCode,
         currentURL,
       })
       .catch(console.error);

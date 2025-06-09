@@ -10,6 +10,7 @@ import { User, UserDocument, UserModelType } from "../domain/user.entity";
 import { DomainException } from "../../../../core/exceptions/domain-exceptions";
 import { DomainExceptionCode } from "../../../../core/exceptions/domain-exception-codes";
 import { RegistrationEntity } from "../domain/registration.entity.pg";
+import { PasswordRecoveryEntity } from "../domain/passwordRecovery.entity.pg";
 
 @Injectable()
 export class UsersRepository {
@@ -151,7 +152,9 @@ export class UsersRepository {
     deletedAt: string;
   }): Promise<void> {
     const query = `
-       UPDATE ${SETTINGS.TABLES.USERS} SET "deletedAt" = '${dto.deletedAt}' WHERE "id" = $1
+       UPDATE ${SETTINGS.TABLES.USERS}
+        SET "deletedAt" = '${dto.deletedAt}'
+        WHERE "id" = $1
     `;
 
     try {
@@ -203,6 +206,39 @@ export class UsersRepository {
     }
   }
 
+  async updateRegistrationConfirmationCode_pg(dto: {
+    userId: string;
+    confirmationCode: string;
+    codeExpirationDate: number;
+  }): Promise<void> {
+    const query = `
+       UPDATE ${SETTINGS.TABLES.USERS_REGISTRATION_INFO} 
+       SET "confirmationCode" = $1,
+           "codeExpirationDate" = $2
+       WHERE "userId" = $3
+    `;
+
+    try {
+      await this.dataSource.query(query, [
+        dto.confirmationCode,
+        dto.codeExpirationDate,
+        dto.userId,
+      ]);
+    } catch (e) {
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to update registration confirmation code",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to update registration confirmation code",
+          },
+        ],
+      });
+    }
+  }
+
   async findRegistrationInfoByConfirmationCode_pg(
     confirmationCode: string,
   ): Promise<RegistrationEntity | null> {
@@ -217,7 +253,7 @@ export class UsersRepository {
     try {
       const response = await this.dataSource.query(query, [confirmationCode]);
       return response[0];
-    } catch (e){
+    } catch (e) {
       console.log(e);
       throw new DomainException({
         code: DomainExceptionCode.InternalServerError,
@@ -239,8 +275,8 @@ export class UsersRepository {
 
     try {
       await this.dataSource.query(query, [userId]);
-    } catch (e){
-      console.log(e)
+    } catch (e) {
+      console.log(e);
       throw new DomainException({
         code: DomainExceptionCode.InternalServerError,
         message: "Failed to confirm user registration",
@@ -248,6 +284,35 @@ export class UsersRepository {
           {
             field: "",
             message: "Failed to confirm user registration",
+          },
+        ],
+      });
+    }
+  }
+
+  async setPasswordRecoveryCode_pg(dto: PasswordRecoveryEntity): Promise<void> {
+    const query = `
+        INSERT INTO ${SETTINGS.TABLES.USERS_PASSWORD_RECOVERY_INFO}
+            ("recoveryCode","codeExpirationDate","userId")
+            VALUES
+            ($1, $2, $3)
+    `;
+
+    try {
+      await this.dataSource.query(query, [
+        dto.recoveryCode,
+        dto.codeExpirationDate,
+        dto.userId,
+      ]);
+    } catch (e) {
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to add password recovery code",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to add password recovery code",
           },
         ],
       });
