@@ -17,7 +17,7 @@ export class DeleteAllOtherSessionCommandHandler
 
   async execute({ payload }: DeleteAllOtherSessionCommand): Promise<void> {
     const currentUserSession =
-      await this.sessionsRepository.findBy_userId_deviceId_version({
+      await this.sessionsRepository.findBy_userId_deviceId_version_pg({
         userId: payload.userId,
         deviceId: payload.deviceId,
         version: payload.version,
@@ -36,22 +36,9 @@ export class DeleteAllOtherSessionCommandHandler
       });
     }
 
-    const isSessionsDeleted =
-      await this.sessionsRepository.deleteAllOtherSession({
-        userId: payload.userId,
-        currentDeviceId: payload.deviceId,
-      });
-    if (!isSessionsDeleted) {
-      throw new DomainException({
-        code: DomainExceptionCode.InternalServerError,
-        message: "Unable sessions deleting",
-        extensions: [
-          {
-            field: "",
-            message: "Unable sessions deleting",
-          },
-        ],
-      });
-    }
+    await this.sessionsRepository.deleteAllOtherSessions_pg({
+      userId: payload.userId,
+      currentDeviceId: payload.deviceId,
+    });
   }
 }

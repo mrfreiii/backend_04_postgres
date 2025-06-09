@@ -33,14 +33,14 @@ export class SessionsController {
     return this.sessionsQueryRepository.getAllActiveSessions_pg(payload.userId);
   }
 
-  // @Delete()
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // @UseGuards(CookieJwtAuthGuard)
-  // async deleteAllOtherSessions(
-  //   @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
-  // ): Promise<void> {
-  //   return this.commandBus.execute(new DeleteAllOtherSessionCommand(payload));
-  // }
+  @Delete()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(CookieJwtAuthGuard)
+  async deleteAllOtherSessions(
+    @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
+  ): Promise<void> {
+    return this.commandBus.execute(new DeleteAllOtherSessionCommand(payload));
+  }
 
   @ApiParam({ name: "deviceId" })
   @Delete(":deviceId")

@@ -22,6 +22,7 @@ describe("sessions /devices", () => {
   let deviceId2: string;
   let deviceId3: string;
   let deviceId4: string;
+  let deviceId5: string;
 
   let lastActiveDate1stDevice: string;
 
@@ -38,7 +39,7 @@ describe("sessions /devices", () => {
     await req.get(`${SETTINGS.PATH.SESSIONS}`).expect(401);
   });
 
-  it("should get 4 sessions", async () => {
+  it("should get 5 sessions", async () => {
     // session #1
     const res1 = await req
       .post(`${SETTINGS.PATH.AUTH}/login`)
@@ -79,10 +80,21 @@ describe("sessions /devices", () => {
       .send(authData)
       .expect(200);
 
+    // session #5
+    const res5 = await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .set(
+        "User-Agent",
+        "Mozilla/5.0 (Windows; U; Windows NT 10.1; x64; en-US) AppleWebKit/534.34 (KHTML, like Gecko) Chrome/49.0.2605.271 Safari/602.5 Edge/9.21230",
+      )
+      .send(authData)
+      .expect(200);
+
     deviceId1 = getDeviceIdFromRefreshTokenCookie(res1.headers["set-cookie"]);
     deviceId2 = getDeviceIdFromRefreshTokenCookie(res2.headers["set-cookie"]);
     deviceId3 = getDeviceIdFromRefreshTokenCookie(res3.headers["set-cookie"]);
     deviceId4 = getDeviceIdFromRefreshTokenCookie(res4.headers["set-cookie"]);
+    deviceId5 = getDeviceIdFromRefreshTokenCookie(res5.headers["set-cookie"]);
 
     cookieWithRefreshTokenDevice1 = res1.headers["set-cookie"];
     cookieWithRefreshTokenDevice4 = res4.headers["set-cookie"];
@@ -115,6 +127,12 @@ describe("sessions /devices", () => {
       },
       {
         deviceId: deviceId4,
+        ip: expect.any(String),
+        lastActiveDate: expect.any(String),
+        title: "Browser: Edge 9.21230; OS: Windows NT 10.1",
+      },
+      {
+        deviceId: deviceId5,
         ip: expect.any(String),
         lastActiveDate: expect.any(String),
         title: "Browser: Edge 9.21230; OS: Windows NT 10.1",
@@ -161,6 +179,12 @@ describe("sessions /devices", () => {
         title: "Browser: Edge 9.21230; OS: Windows NT 10.1",
       },
       {
+        deviceId: deviceId5,
+        ip: expect.any(String),
+        lastActiveDate: expect.any(String),
+        title: "Browser: Edge 9.21230; OS: Windows NT 10.1",
+      },
+      {
         deviceId: deviceId1,
         ip: expect.any(String),
         lastActiveDate: expect.any(String),
@@ -168,7 +192,9 @@ describe("sessions /devices", () => {
       },
     ]);
 
-    expect(sessions.body[3].lastActiveDate).not.toBe(lastActiveDate1stDevice);
+    expect(
+      sessions.body.find((s) => s.deviceId === deviceId1).lastActiveDate,
+    ).not.toBe(lastActiveDate1stDevice);
   });
 
   it("should delete device after logout", async () => {
@@ -194,6 +220,12 @@ describe("sessions /devices", () => {
         ip: expect.any(String),
         lastActiveDate: expect.any(String),
         title: "Browser: Mobile Chrome 51.0.1700.324; OS: iOS 11.1.3",
+      },
+      {
+        deviceId: deviceId5,
+        ip: expect.any(String),
+        lastActiveDate: expect.any(String),
+        title: "Browser: Edge 9.21230; OS: Windows NT 10.1",
       },
       {
         deviceId: deviceId1,
@@ -266,6 +298,12 @@ describe("sessions /devices", () => {
         title: "Browser: Mobile Chrome 51.0.1700.324; OS: iOS 11.1.3",
       },
       {
+        deviceId: deviceId5,
+        ip: expect.any(String),
+        lastActiveDate: expect.any(String),
+        title: "Browser: Edge 9.21230; OS: Windows NT 10.1",
+      },
+      {
         deviceId: deviceId1,
         ip: expect.any(String),
         lastActiveDate: expect.any(String),
@@ -274,24 +312,24 @@ describe("sessions /devices", () => {
     ]);
   });
 
-  // it("should delete all other devices - DELETE /devices", async () => {
-  //   await req
-  //     .delete(SETTINGS.PATH.SESSIONS)
-  //     .set("Cookie", cookieWithRefreshTokenDevice1)
-  //     .expect(204);
-  //
-  //   const sessions = await req
-  //     .get(SETTINGS.PATH.SESSIONS)
-  //     .set("Cookie", cookieWithRefreshTokenDevice1)
-  //     .expect(200);
-  //
-  //   expect(sessions.body).toEqual([
-  //     {
-  //       deviceId: deviceId1,
-  //       ip: expect.any(String),
-  //       lastActiveDate: expect.any(String),
-  //       title: "Browser: Chrome 53.0.1935.131; OS: Linux i651",
-  //     },
-  //   ]);
-  // });
+  it("should delete all other devices - DELETE /devices", async () => {
+    await req
+      .delete(SETTINGS.PATH.SESSIONS)
+      .set("Cookie", cookieWithRefreshTokenDevice1)
+      .expect(204);
+
+    const sessions = await req
+      .get(SETTINGS.PATH.SESSIONS)
+      .set("Cookie", cookieWithRefreshTokenDevice1)
+      .expect(200);
+
+    expect(sessions.body).toEqual([
+      {
+        deviceId: deviceId1,
+        ip: expect.any(String),
+        lastActiveDate: expect.any(String),
+        title: "Browser: Chrome 53.0.1935.131; OS: Linux i651",
+      },
+    ]);
+  });
 });

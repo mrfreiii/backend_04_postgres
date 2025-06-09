@@ -6,7 +6,6 @@ import { InjectDataSource } from "@nestjs/typeorm";
 
 import {
   Session,
-  SessionDocument,
   SessionModelType,
 } from "../domain/session.entity";
 import { SETTINGS } from "../../../../settings";
@@ -183,61 +182,30 @@ export class SessionsRepository {
     }
   }
 
-  // async save(session: SessionDocument) {
-  //   await session.save();
-  // }
-
-  async findByDeviceId(deviceId: string): Promise<SessionDocument | null> {
-    return this.SessionModel.findOne({
-      deviceId,
-    });
-  }
-
-  async findBy_userId_deviceId_version(dto: {
-    userId: string;
-    deviceId: string;
-    version: number;
-  }): Promise<SessionDocument | null> {
-    const { userId, deviceId, version } = dto;
-
-    return this.SessionModel.findOne({
-      userId,
-      deviceId,
-      version,
-    });
-  }
-
-  async deleteSession(dto: {
-    deviceId: string;
-    userId: string;
-  }): Promise<boolean> {
-    const { deviceId, userId } = dto;
-
-    try {
-      const result = await this.SessionModel.deleteOne({
-        deviceId,
-        userId,
-      });
-      return result.deletedCount === 1;
-    } catch {
-      return false;
-    }
-  }
-
-  async deleteAllOtherSession(dto: {
+  async deleteAllOtherSessions_pg(dto: {
     currentDeviceId: string;
     userId: string;
-  }): Promise<boolean> {
-    const { currentDeviceId, userId } = dto;
+  }): Promise<void> {
+    const query = `
+        DELETE FROM ${SETTINGS.TABLES.SESSIONS}
+        WHERE "userId" = $1 
+        AND "deviceId" != $2
+    `;
 
     try {
-      const result = await this.SessionModel.deleteMany({
-        deviceId: { $ne: currentDeviceId },
-        userId,
+      await this.dataSource.query(query, [dto.userId, dto.currentDeviceId]);
+    } catch (e) {
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to delete sessions",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to delete sessions",
+          },
+        ],
       });
-      return result.deletedCount === 1;
-    } catch {
-      return false;
     }
   }
 }
