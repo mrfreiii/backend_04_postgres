@@ -9,7 +9,7 @@ import {
   SessionModelType,
 } from "../domain/session.entity";
 import { SETTINGS } from "../../../../settings";
-import { SessionEntity } from "../domain/session.entity.pg";
+import { SessionEntityType } from "../domain/session.entity.pg";
 import { DomainException } from "../../../../core/exceptions/domain-exceptions";
 import { DomainExceptionCode } from "../../../../core/exceptions/domain-exception-codes";
 
@@ -20,7 +20,7 @@ export class SessionsRepository {
     @InjectDataSource() private dataSource: DataSource,
   ) {}
 
-  async createSession_pg(session: SessionEntity) {
+  async createSession_pg(session: SessionEntityType) {
     const query = `
         INSERT INTO ${SETTINGS.TABLES.SESSIONS}
             ("userId","deviceId","ip","title","version","issuedAt","expirationTime")
@@ -53,9 +53,79 @@ export class SessionsRepository {
     }
   }
 
-  async save(session: SessionDocument) {
-    await session.save();
+  async findBy_userId_deviceId_version_pg(dto: {
+    userId: string;
+    deviceId: string;
+    version: number;
+  }): Promise<SessionEntityType> {
+    const { userId, deviceId, version } = dto;
+
+    const query = `
+        SELECT * FROM ${SETTINGS.TABLES.SESSIONS}
+            WHERE "userId" = $1
+            AND "deviceId" = $2
+            AND "version" = $3
+    `;
+
+    try {
+      const result = await this.dataSource.query(query, [
+        userId,
+        deviceId,
+        version,
+      ]);
+      return result?.[0];
+    } catch {
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get session from db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to get session from db",
+          },
+        ],
+      });
+    }
   }
+
+  async updateSession_pg(session: SessionEntityType): Promise<void> {
+    const query = `
+       UPDATE ${SETTINGS.TABLES.SESSIONS}
+        SET "ip" = $1,
+            "title" = $2,
+            "version" = $3,
+            "issuedAt" = $4,
+            "expirationTime" = $5
+        WHERE "deviceId" = $6
+    `;
+
+    try {
+      await this.dataSource.query(query, [
+        session.ip,
+        session.title,
+        session.version,
+        session.issuedAt,
+        session.expirationTime,
+        session.deviceId,
+      ]);
+    } catch (e){
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to update session",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to update session",
+          },
+        ],
+      });
+    }
+  }
+
+  // async save(session: SessionDocument) {
+  //   await session.save();
+  // }
 
   async findByDeviceId(deviceId: string): Promise<SessionDocument | null> {
     return this.SessionModel.findOne({

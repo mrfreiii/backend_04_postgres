@@ -138,30 +138,30 @@ export class AuthController {
     return this.authQueryRepository.me_pg(user.id);
   }
 
-  // @Post("refresh-token")
-  // @HttpCode(HttpStatus.OK)
-  // @UseGuards(CookieJwtAuthGuard)
-  // async refreshToken(
-  //   @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
-  //   @Req() req: Request,
-  //   @Res({ passthrough: true }) response: Response,
-  // ): Promise<{
-  //   accessToken: string;
-  // }> {
-  //   const userAgent = req.headers["user-agent"];
-  //   const ip = req.ip;
-  //
-  //   const result = await this.commandBus.execute(
-  //     new RefreshTokenCommand({ payload, userAgent, ip }),
-  //   );
-  //
-  //   response.cookie("refreshToken", result.refreshToken, {
-  //     httpOnly: true,
-  //     secure: true,
-  //   });
-  //
-  //   return { accessToken: result.accessToken };
-  // }
+  @Post("refresh-token")
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(CookieJwtAuthGuard)
+  async refreshToken(
+    @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<{
+    accessToken: string;
+  }> {
+    const userAgent = req.headers["user-agent"];
+    const ip = req.ip;
+
+    const result = await this.commandBus.execute(
+      new RefreshTokenCommand({ payload, userAgent, ip }),
+    );
+
+    response.cookie("refreshToken", result.refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+
+    return { accessToken: result.accessToken };
+  }
 
   // @Post("logout")
   // @HttpCode(HttpStatus.NO_CONTENT)
