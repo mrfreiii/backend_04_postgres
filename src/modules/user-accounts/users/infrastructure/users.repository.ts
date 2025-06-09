@@ -319,6 +319,61 @@ export class UsersRepository {
     }
   }
 
+  async findPasswordRecoveryInfoByRecoveryCode_pg(
+    recoveryCode: string,
+  ): Promise<PasswordRecoveryEntity | null> {
+    if (!isValidUUID(recoveryCode)) {
+      return null;
+    }
+
+    const query = `
+       SELECT * FROM ${SETTINGS.TABLES.USERS_PASSWORD_RECOVERY_INFO} WHERE "recoveryCode" = $1
+    `;
+
+    try {
+      const response = await this.dataSource.query(query, [recoveryCode]);
+      return response[0];
+    } catch (e) {
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get row with password recovery code",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to get row with password recovery code",
+          },
+        ],
+      });
+    }
+  }
+
+  async updateUserPassword(dto: {
+    userId: string;
+    newPassword: string;
+  }): Promise<void> {
+    const query = `
+       UPDATE ${SETTINGS.TABLES.USERS}
+        SET "passwordHash" = '${dto.newPassword}'
+        WHERE "id" = $1
+    `;
+
+    try {
+      await this.dataSource.query(query, [dto.userId]);
+    } catch {
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to update user password",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to update user password",
+          },
+        ],
+      });
+    }
+  }
+
   async save(user: UserDocument) {
     await user.save();
   }

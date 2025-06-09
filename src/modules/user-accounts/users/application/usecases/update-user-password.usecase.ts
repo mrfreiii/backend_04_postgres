@@ -20,41 +20,47 @@ export class UpdateUserPasswordCommandHandler
   ) {}
 
   async execute({ dto }: UpdateUserPasswordCommand): Promise<void> {
-    const user = await this.usersRepository.findByPasswordRecoveryCode(
-      dto.recoveryCode,
-    );
-    if (!user) {
+    const passwordRecoveryInfo =
+      await this.usersRepository.findPasswordRecoveryInfoByRecoveryCode_pg(
+        dto.recoveryCode,
+      );
+    if (!passwordRecoveryInfo) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: "Invalid recovery code",
         extensions: [
           {
-            field: "recoveryCode",
+            field: "code",
             message: "Invalid recovery code",
           },
         ],
       });
     }
 
-    if (user.passwordRecoveryCodeExpirationDate < new Date().getTime()) {
+    if (passwordRecoveryInfo.codeExpirationDate < new Date().getTime()) {
       throw new DomainException({
         code: DomainExceptionCode.ConfirmationCodeExpired,
         message: "Recovery code expired",
         extensions: [
           {
-            field: "recoveryCode",
-            message: "Code expired",
+            field: "code",
+            message: "Recovery code expired",
           },
         ],
       });
     }
 
+    const user = await this.usersRepository.findOrNotFoundFail_pg(
+      passwordRecoveryInfo.userId,
+    );
+
     const passwordHash = await this.cryptoService.createPasswordHash(
       dto.newPassword,
     );
 
-    user.updatePassword(passwordHash);
-
-    await this.usersRepository.save(user);
+    await this.usersRepository.updateUserPassword({
+      userId: user.id,
+      newPassword: passwordHash,
+    });
   }
 }

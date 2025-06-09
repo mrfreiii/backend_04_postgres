@@ -11,6 +11,7 @@ import { SETTINGS } from "../../settings";
 import { deleteRateLimitsData } from "../testing/helpers";
 import {
   DEFAULT_USER_EMAIL,
+  getUserPasswordRecoveryCode,
   getUserRegistrationConfirmationCode,
   registerTestUser,
 } from "./helpers";
@@ -540,135 +541,139 @@ describe("send password recovery code /password-recovery", () => {
   // });
 });
 
-// describe("confirm password recovery /new-password", () => {
-//   connectToTestDBAndClearRepositories();
-//
-//   const userEmail = "user1@email.com";
-//
-//   beforeAll(async () => {
-//     await registerTestUser([userEmail]);
-//
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
-//       .send({ email: userEmail })
-//       .expect(204);
-//   });
-//
-//   beforeEach(async () => {
-//     await deleteRateLimitsData();
-//   });
-//
-//   afterEach(() => {
-//     global.Date = RealDate;
-//   });
-//
-//   it("should return 400 for invalid newPassword and recoveryCode format", async () => {
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/new-password`)
-//       .send({ newPassword: 123, recoveryCode: 123 })
-//       .expect(400);
-//
-//     expect(res.body.errorsMessages.length).toBe(2);
-//     expect(res.body.errorsMessages).toEqual([
-//       {
-//         field: "newPassword",
-//         message:
-//           "newPassword must be longer than or equal to 6 and shorter than or equal to 20 characters; Received value: 123",
-//       },
-//       {
-//         field: "recoveryCode",
-//         message: "recoveryCode must be a string; Received value: 123",
-//       },
-//     ]);
-//   });
-//
-//   it("should return 400 for expiration of recovery code", async () => {
-//     const dateInFuture = add(new Date(), {
-//       minutes: 10,
-//     });
-//     mockDate(dateInFuture.toISOString());
-//
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/new-password`)
-//       .send({
-//         newPassword: "1234567",
-//         recoveryCode: validConfirmationOrRecoveryCode,
-//       })
-//       .expect(400);
-//
-//     expect(res.body.errorsMessages[0]).toEqual({
-//       field: "recoveryCode",
-//       message: "Code expired",
-//     });
-//   });
-//
-//   it("should confirm password recovery", async () => {
-//     const newPassword = "999988887777";
-//
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/new-password`)
-//       .send({
-//         newPassword: newPassword,
-//         recoveryCode: validConfirmationOrRecoveryCode,
-//       })
-//       .expect(204);
-//
-//     const authData: { loginOrEmail: string; password: string } = {
-//       loginOrEmail: userEmail,
-//       password: newPassword,
-//     };
-//     await req.post(`${SETTINGS.PATH.AUTH}/login`).send(authData).expect(200);
-//   });
-//
-//   it("should return 429 for 6th request and 400 after waiting 10 sec", async () => {
-//     // attempt #1
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/new-password`)
-//       .send({ newPassword: "qwerty", recoveryCode: "12345" })
-//       .expect(400);
-//
-//     // attempt #2
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/new-password`)
-//       .send({ newPassword: "qwerty", recoveryCode: "12345" })
-//       .expect(400);
-//
-//     // attempt #3
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/new-password`)
-//       .send({ newPassword: "qwerty", recoveryCode: "12345" })
-//       .expect(400);
-//
-//     // attempt #4
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/new-password`)
-//       .send({ newPassword: "qwerty", recoveryCode: "12345" })
-//       .expect(400);
-//
-//     // attempt #5
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/new-password`)
-//       .send({ newPassword: "qwerty", recoveryCode: "12345" })
-//       .expect(400);
-//
-//     // attempt #6
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/new-password`)
-//       .send({ newPassword: "qwerty", recoveryCode: "12345" })
-//       .expect(429);
-//
-//     const dateInFuture = add(new Date(), {
-//       seconds: 10,
-//     });
-//     mockDate(dateInFuture.toISOString());
-//
-//     // attempt #7
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/new-password`)
-//       .send({ newPassword: "qwerty", recoveryCode: "12345" })
-//       .expect(400);
-//   });
-// });
+describe("confirm password recovery /new-password", () => {
+  connectToTestDBAndClearRepositories();
+
+  const userEmail = "user1@email.com";
+  let validPasswordRecoveryCode: string;
+
+  beforeAll(async () => {
+    await registerTestUser([userEmail]);
+
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+      .send({ email: userEmail })
+      .expect(204);
+
+    validPasswordRecoveryCode = await getUserPasswordRecoveryCode(userEmail);
+  });
+
+  // beforeEach(async () => {
+  //   await deleteRateLimitsData();
+  // });
+
+  afterEach(() => {
+    global.Date = RealDate;
+  });
+
+  it("should return 400 for invalid newPassword and recoveryCode format", async () => {
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/new-password`)
+      .send({ newPassword: 123, recoveryCode: 123 })
+      .expect(400);
+
+    expect(res.body.errorsMessages.length).toBe(2);
+    expect(res.body.errorsMessages).toEqual([
+      {
+        field: "newPassword",
+        message:
+          "newPassword must be longer than or equal to 6 and shorter than or equal to 20 characters; Received value: 123",
+      },
+      {
+        field: "recoveryCode",
+        message: "recoveryCode must be a string; Received value: 123",
+      },
+    ]);
+  });
+
+  it("should return 400 for expiration of recovery code", async () => {
+    const dateInFuture = add(new Date(), {
+      minutes: 10,
+    });
+    mockDate(dateInFuture.toISOString());
+
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/new-password`)
+      .send({
+        newPassword: "1234567",
+        recoveryCode: validPasswordRecoveryCode,
+      })
+      .expect(400);
+
+    expect(res.body.errorsMessages[0]).toEqual({
+      field: "code",
+      message: "Recovery code expired",
+    });
+  });
+
+  it("should confirm password recovery", async () => {
+    const newPassword = "999988887777";
+
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/new-password`)
+      .send({
+        newPassword: newPassword,
+        recoveryCode: validPasswordRecoveryCode,
+      })
+      .expect(204);
+
+    // const authData: { loginOrEmail: string; password: string } = {
+    //   loginOrEmail: userEmail,
+    //   password: newPassword,
+    // };
+    // TODO: вернуть после того как сделать логин
+    // await req.post(`${SETTINGS.PATH.AUTH}/login`).send(authData).expect(200);
+  });
+
+  // it("should return 429 for 6th request and 400 after waiting 10 sec", async () => {
+  //   // attempt #1
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
+  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
+  //     .expect(400);
+  //
+  //   // attempt #2
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
+  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
+  //     .expect(400);
+  //
+  //   // attempt #3
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
+  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
+  //     .expect(400);
+  //
+  //   // attempt #4
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
+  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
+  //     .expect(400);
+  //
+  //   // attempt #5
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
+  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
+  //     .expect(400);
+  //
+  //   // attempt #6
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
+  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
+  //     .expect(429);
+  //
+  //   const dateInFuture = add(new Date(), {
+  //     seconds: 10,
+  //   });
+  //   mockDate(dateInFuture.toISOString());
+  //
+  //   // attempt #7
+  //   await req
+  //     .post(`${SETTINGS.PATH.AUTH}/new-password`)
+  //     .send({ newPassword: "qwerty", recoveryCode: "12345" })
+  //     .expect(400);
+  // });
+});
 
 // describe("login user /login", () => {
 //   connectToTestDBAndClearRepositories();

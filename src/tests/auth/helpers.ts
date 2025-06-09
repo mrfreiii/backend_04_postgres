@@ -21,8 +21,18 @@ export const registerTestUser = async (
   }
 };
 
-export const getUserRegistrationConfirmationCode = async (email: string) =>{
-  const res = await req.get(`${SETTINGS.PATH.TESTING}/registration-code/${email}`).expect(200);
+export const getUserRegistrationConfirmationCode = async (email: string) => {
+  const res = await req
+    .get(`${SETTINGS.PATH.TESTING}/registration-code/${email}`)
+    .expect(200);
 
   return res.body.code;
-}
+};
+
+export const getUserPasswordRecoveryCode = async (email: string) => {
+  const res = await req
+    .get(`${SETTINGS.PATH.TESTING}/password-recovery-code/${email}`)
+    .expect(200);
+
+  return res.body.code;
+};

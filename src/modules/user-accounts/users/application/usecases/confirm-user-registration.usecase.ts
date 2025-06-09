@@ -1,8 +1,6 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 
-import {
-  DomainExceptionCode,
-} from "../../../../../core/exceptions/domain-exception-codes";
+import { DomainExceptionCode } from "../../../../../core/exceptions/domain-exception-codes";
 import { UsersRepository } from "../../infrastructure/users.repository";
 import { DomainException } from "../../../../../core/exceptions/domain-exceptions";
 
@@ -14,12 +12,13 @@ export class ConfirmUserRegistrationCommand {
 export class ConfirmUserRegistrationCommandHandler
   implements ICommandHandler<ConfirmUserRegistrationCommand, void>
 {
-  constructor(
-    private usersRepository: UsersRepository,
-  ) {}
+  constructor(private usersRepository: UsersRepository) {}
 
   async execute({ code }: ConfirmUserRegistrationCommand): Promise<void> {
-    const registrationInfo = await this.usersRepository.findRegistrationInfoByConfirmationCode_pg(code);
+    const registrationInfo =
+      await this.usersRepository.findRegistrationInfoByConfirmationCode_pg(
+        code,
+      );
     if (!registrationInfo) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
@@ -46,7 +45,9 @@ export class ConfirmUserRegistrationCommandHandler
       });
     }
 
-    const user = await this.usersRepository.findOrNotFoundFail_pg(registrationInfo.userId)
+    const user = await this.usersRepository.findOrNotFoundFail_pg(
+      registrationInfo.userId,
+    );
     if (user.isEmailConfirmed) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
@@ -60,6 +61,8 @@ export class ConfirmUserRegistrationCommandHandler
       });
     }
 
-    await this.usersRepository.confirmUserRegistration_pg(registrationInfo.userId)
+    await this.usersRepository.confirmUserRegistration_pg(
+      registrationInfo.userId,
+    );
   }
 }

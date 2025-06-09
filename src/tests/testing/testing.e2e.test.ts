@@ -55,9 +55,32 @@ describe("get user registration confirmation code", () => {
   connectToTestDBAndClearRepositories();
 
   it("should return code", async () => {
-    await registerTestUser();
+    const userEmail = "registration_confirmaion_test@email.com";
+    await registerTestUser([userEmail]);
 
-    const res = await req.get(`${SETTINGS.PATH.TESTING}/registration-code/${DEFAULT_USER_EMAIL}`).expect(200);
+    const res = await req
+      .get(`${SETTINGS.PATH.TESTING}/registration-code/${userEmail}`)
+      .expect(200);
+
+    expect(res.body.code).toEqual(expect.any(String));
+  });
+});
+
+describe("get user password recovery code", () => {
+  connectToTestDBAndClearRepositories();
+
+  it("should return code", async () => {
+    const userEmail = "password_recovery_test@email.com";
+    await registerTestUser([userEmail]);
+
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/password-recovery`)
+      .send({ email: userEmail })
+      .expect(204);
+
+    const res = await req
+      .get(`${SETTINGS.PATH.TESTING}/password-recovery-code/${userEmail}`)
+      .expect(200);
 
     expect(res.body.code).toEqual(expect.any(String));
   });

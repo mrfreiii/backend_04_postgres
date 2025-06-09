@@ -99,12 +99,12 @@ export class AuthController {
     );
   }
 
-  // @Post("new-password")
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // @UseGuards(RateLimitGuard)
-  // async updatePassword(@Body() body: UpdatePasswordInputDto) {
-  //   return this.commandBus.execute(new UpdateUserPasswordCommand(body));
-  // }
+  @Post("new-password")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(RateLimitGuard)
+  async updatePassword(@Body() body: UpdatePasswordInputDto) {
+    return this.commandBus.execute(new UpdateUserPasswordCommand(body));
+  }
 
   // @Post("login")
   // @HttpCode(HttpStatus.OK)
