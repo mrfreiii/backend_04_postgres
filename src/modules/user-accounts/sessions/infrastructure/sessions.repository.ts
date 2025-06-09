@@ -108,7 +108,7 @@ export class SessionsRepository {
         session.expirationTime,
         session.deviceId,
       ]);
-    } catch (e){
+    } catch (e) {
       console.log(e);
       throw new DomainException({
         code: DomainExceptionCode.InternalServerError,
@@ -117,6 +117,29 @@ export class SessionsRepository {
           {
             field: "",
             message: "Failed to update session",
+          },
+        ],
+      });
+    }
+  }
+
+  async deleteSession_pg(deviceId: string): Promise<void> {
+    const query = `
+        DELETE FROM ${SETTINGS.TABLES.SESSIONS}
+        WHERE "deviceId" = $1
+    `;
+
+    try {
+      await this.dataSource.query(query, [deviceId]);
+    } catch (e) {
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to delete session",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to delete session",
           },
         ],
       });

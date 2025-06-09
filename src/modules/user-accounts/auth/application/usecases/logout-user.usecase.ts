@@ -19,7 +19,7 @@ export class LogoutUserCommandHandler
     const { userId, deviceId, version } = payload;
 
     const session =
-      await this.sessionsRepository.findBy_userId_deviceId_version({
+      await this.sessionsRepository.findBy_userId_deviceId_version_pg({
         userId,
         deviceId,
         version,
@@ -38,21 +38,6 @@ export class LogoutUserCommandHandler
       });
     }
 
-    const isSessionDeleted = await this.sessionsRepository.deleteSession({
-      userId,
-      deviceId,
-    });
-    if (!isSessionDeleted) {
-      throw new DomainException({
-        code: DomainExceptionCode.InternalServerError,
-        message: "Unable session deleting",
-        extensions: [
-          {
-            field: "",
-            message: "Unable session deleting",
-          },
-        ],
-      });
-    }
+    await this.sessionsRepository.deleteSession_pg(deviceId);
   }
 }

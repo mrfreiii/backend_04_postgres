@@ -163,12 +163,12 @@ export class AuthController {
     return { accessToken: result.accessToken };
   }
 
-  // @Post("logout")
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // @UseGuards(CookieJwtAuthGuard)
-  // async logout(
-  //   @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
-  // ): Promise<void> {
-  //   return this.commandBus.execute(new LogoutUserCommand(payload));
-  // }
+  @Post("logout")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(CookieJwtAuthGuard)
+  async logout(
+    @ExtractRefreshTokenPayload() payload: RefreshTokenPayloadDto,
+  ): Promise<void> {
+    return this.commandBus.execute(new LogoutUserCommand(payload));
+  }
 }

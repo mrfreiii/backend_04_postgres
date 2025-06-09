@@ -975,73 +975,73 @@ describe("refresh token /refresh-token", () => {
   });
 });
 
-// describe("logout /logout", () => {
-//   connectToTestDBAndClearRepositories();
-//
-//   const userPassword = "1234567890";
-//   let createdUser: UserViewDto;
-//
-//   let authData: { loginOrEmail: string; password: string };
-//   let cookieWithValidRefreshToken: string;
-//
-//   beforeAll(async () => {
-//     createdUser = (await createTestUsers({ password: userPassword }))[0];
-//
-//     authData = {
-//       loginOrEmail: createdUser.login,
-//       password: userPassword,
-//     };
-//   });
-//
-//   it("should return 401 for no refresh token in cookie", async () => {
-//     const res = await req.post(`${SETTINGS.PATH.AUTH}/logout`).expect(401);
-//
-//     expect(res.body.errorsMessages[0]).toEqual({
-//       field: "",
-//       message: "There is no cookie with refresh token",
-//     });
-//   });
-//
-//   it("should return 401 for invalid refresh token", async () => {
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/logout`)
-//       .set("Cookie", ["refreshToken=12345667"])
-//       .expect(401);
-//
-//     expect(res.body.errorsMessages[0]).toEqual({
-//       field: "",
-//       message: "Invalid refresh token in cookie",
-//     });
-//   });
-//
-//   it("should return 401 for outdated refresh token", async () => {
-//     const loginRes = await req
-//       .post(`${SETTINGS.PATH.AUTH}/login`)
-//       .send(authData)
-//       .expect(200);
-//     const cookieWithOutdatedRefreshToken = loginRes.headers["set-cookie"];
-//
-//     const refreshRes = await req
-//       .post(`${SETTINGS.PATH.AUTH}/refresh-token`)
-//       .set("Cookie", loginRes.headers["set-cookie"])
-//       .expect(200);
-//     cookieWithValidRefreshToken = refreshRes.headers["set-cookie"];
-//
-//     const res = await req
-//       .post(`${SETTINGS.PATH.AUTH}/logout`)
-//       .set("cookie", cookieWithOutdatedRefreshToken)
-//       .expect(401);
-//
-//     expect(res.body.errorsMessages[0]).toEqual({
-//       field: "",
-//       message: "Session is invalid",
-//     });
-//   });
-//
-//   it("should logout user", async () => {
-//     await req
-//       .post(`${SETTINGS.PATH.AUTH}/logout`)
-//       .set("Cookie", cookieWithValidRefreshToken)
-//       .expect(204);
-//   });
-// });
+describe("logout /logout", () => {
+  connectToTestDBAndClearRepositories();
+
+  const userPassword = "1234567890";
+  let createdUser: UserViewDto;
+
+  let authData: { loginOrEmail: string; password: string };
+  let cookieWithValidRefreshToken: string;
+
+  beforeAll(async () => {
+    createdUser = (await createTestUsers({ password: userPassword }))[0];
+
+    authData = {
+      loginOrEmail: createdUser.login,
+      password: userPassword,
+    };
+  });
+
+  it("should return 401 for no refresh token in cookie", async () => {
+    const res = await req.post(`${SETTINGS.PATH.AUTH}/logout`).expect(401);
+
+    expect(res.body.errorsMessages[0]).toEqual({
+      field: "",
+      message: "There is no cookie with refresh token",
+    });
+  });
+
+  it("should return 401 for invalid refresh token", async () => {
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/logout`)
+      .set("Cookie", ["refreshToken=12345667"])
+      .expect(401);
+
+    expect(res.body.errorsMessages[0]).toEqual({
+      field: "",
+      message: "Invalid refresh token in cookie",
+    });
+  });
+
+  it("should return 401 for outdated refresh token", async () => {
+    const loginRes = await req
+      .post(`${SETTINGS.PATH.AUTH}/login`)
+      .send(authData)
+      .expect(200);
+    const cookieWithOutdatedRefreshToken = loginRes.headers["set-cookie"];
+
+    const refreshRes = await req
+      .post(`${SETTINGS.PATH.AUTH}/refresh-token`)
+      .set("Cookie", loginRes.headers["set-cookie"])
+      .expect(200);
+    cookieWithValidRefreshToken = refreshRes.headers["set-cookie"];
+
+    const res = await req
+      .post(`${SETTINGS.PATH.AUTH}/logout`)
+      .set("cookie", cookieWithOutdatedRefreshToken)
+      .expect(401);
+
+    expect(res.body.errorsMessages[0]).toEqual({
+      field: "",
+      message: "Session is invalid",
+    });
+  });
+
+  it("should logout user", async () => {
+    await req
+      .post(`${SETTINGS.PATH.AUTH}/logout`)
+      .set("Cookie", cookieWithValidRefreshToken)
+      .expect(204);
+  });
+});
