@@ -131,12 +131,12 @@ export class AuthController {
     return { accessToken: result.accessToken };
   }
 
-  // @ApiBearerAuth()
-  // @Get("me")
-  // @UseGuards(JwtAuthGuard)
-  // me(@ExtractUserFromRequest() user: UserContextDto): Promise<MeViewDto> {
-  //   return this.authQueryRepository.me(user.id);
-  // }
+  @ApiBearerAuth()
+  @Get("me")
+  @UseGuards(JwtAuthGuard)
+  me(@ExtractUserFromRequest() user: UserContextDto): Promise<MeViewDto> {
+    return this.authQueryRepository.me_pg(user.id);
+  }
 
   // @Post("refresh-token")
   // @HttpCode(HttpStatus.OK)

@@ -23,17 +23,17 @@ export class UserViewDtoPg {
   }
 }
 
-export class MeViewDto {
+export class MeViewDtoPg {
   email: string;
   login: string;
   userId: string;
 
-  static mapToView(user: UserDocument): MeViewDto {
-    const dto = new MeViewDto();
+  static mapToView(user: UserEntity): MeViewDtoPg {
+    const dto = new MeViewDtoPg();
 
     dto.email = user.email;
     dto.login = user.login;
-    dto.userId = user._id.toString();
+    dto.userId = user.id;
 
     return dto;
   }

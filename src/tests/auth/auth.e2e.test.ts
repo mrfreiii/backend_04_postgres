@@ -843,60 +843,60 @@ describe("login user /login", () => {
   // });
 });
 
-// describe("check user /me", () => {
-//   connectToTestDBAndClearRepositories();
-//
-//   let createdUser: UserViewDto;
-//   let userToken: string;
-//
-//   beforeAll(async () => {
-//     createdUser = (await createTestUsers({}))[0];
-//     userToken = (await getUsersJwtTokens([createdUser]))[0];
-//   });
-//
-//   it("should return 401 for request without auth header", async () => {
-//     await req.get(`${SETTINGS.PATH.AUTH}/me`).expect(401);
-//   });
-//
-//   it("should return 401 for invalid auth header", async () => {
-//     await req
-//       .get(`${SETTINGS.PATH.AUTH}/me`)
-//       .set("Authorization", "Basic 1234567890")
-//       .expect(401);
-//   });
-//
-//   it("should return 401 for invalid jwt token", async () => {
-//     await req
-//       .get(`${SETTINGS.PATH.AUTH}/me`)
-//       .set("Authorization", "Bearer 1234567890")
-//       .expect(401);
-//   });
-//
-//   it("should return user info", async () => {
-//     const res = await req
-//       .get(`${SETTINGS.PATH.AUTH}/me`)
-//       .set("Authorization", `Bearer ${userToken}`)
-//       .expect(200);
-//
-//     expect(res.body).toEqual({
-//       email: createdUser.email,
-//       login: createdUser.login,
-//       userId: createdUser.id,
-//     });
-//   });
-//
-//   it("should return 401 for expired token", async () => {
-//     const dateInFuture = add(new Date(), {
-//       hours: 1,
-//     });
-//     mockDate(dateInFuture.toISOString());
-//
-//     await req
-//       .get(`${SETTINGS.PATH.AUTH}/me`)
-//       .set("Authorization", `Bearer ${userToken}`)
-//       .expect(401);
-//   });
-// });
+describe("check user /me", () => {
+  connectToTestDBAndClearRepositories();
+
+  let createdUser: UserViewDto;
+  let userToken: string;
+
+  beforeAll(async () => {
+    createdUser = (await createTestUsers({}))[0];
+    userToken = (await getUsersJwtTokens([createdUser]))[0];
+  });
+
+  it("should return 401 for request without auth header", async () => {
+    await req.get(`${SETTINGS.PATH.AUTH}/me`).expect(401);
+  });
+
+  it("should return 401 for invalid auth header", async () => {
+    await req
+      .get(`${SETTINGS.PATH.AUTH}/me`)
+      .set("Authorization", "Basic 1234567890")
+      .expect(401);
+  });
+
+  it("should return 401 for invalid jwt token", async () => {
+    await req
+      .get(`${SETTINGS.PATH.AUTH}/me`)
+      .set("Authorization", "Bearer 1234567890")
+      .expect(401);
+  });
+
+  it("should return user info", async () => {
+    const res = await req
+      .get(`${SETTINGS.PATH.AUTH}/me`)
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(200);
+
+    expect(res.body).toEqual({
+      email: createdUser.email,
+      login: createdUser.login,
+      userId: createdUser.id,
+    });
+  });
+
+  it("should return 401 for expired token", async () => {
+    const dateInFuture = add(new Date(), {
+      hours: 1,
+    });
+    mockDate(dateInFuture.toISOString());
+
+    await req
+      .get(`${SETTINGS.PATH.AUTH}/me`)
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(401);
+  });
+});
 
 // describe("refresh token /refresh-token", () => {
 //   connectToTestDBAndClearRepositories();
