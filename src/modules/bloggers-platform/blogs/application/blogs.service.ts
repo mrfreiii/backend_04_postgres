@@ -5,26 +5,26 @@ import { CreateBlogDto } from "../dto/blog.dto";
 import { Blog, BlogModelType } from "../domain/blog.entity";
 import { BlogsRepository } from "../infrastructure/blogs.repository";
 import { UpdateBlogInputDto } from "../api/input-dto/update-blog.input-dto";
+import { BlogEntity } from "../domain/blog.entity.pg";
 
 @Injectable()
 export class BlogsService {
   constructor(
     @InjectModel(Blog.name) private BlogModel: BlogModelType,
     private blogsRepository: BlogsRepository,
+    private blogEntity: BlogEntity,
   ) {}
-  // private usersExternalService: UsersExternalService,
-  // private usersExternalRepository: UsersExternalQueryRepository,
 
   async createBlog(dto: CreateBlogDto): Promise<string> {
-    const blog = this.BlogModel.createInstance({
+    const blog = this.blogEntity.createInstance({
       name: dto.name,
       description: dto.description,
       websiteUrl: dto.websiteUrl,
     });
 
-    await this.blogsRepository.save(blog);
+    await this.blogsRepository.createBlog_pg(blog);
 
-    return blog._id.toString();
+    return blog.id;
   }
 
   async updateBlog({
@@ -33,21 +33,17 @@ export class BlogsService {
   }: {
     id: string;
     dto: UpdateBlogInputDto;
-  }): Promise<string> {
-    const blog = await this.blogsRepository.findOrNotFoundFail(id);
+  }): Promise<void> {
+    const blog = await this.blogsRepository.findByIdOrNotFoundFail_pg(id);
 
-    blog.update(dto);
-
-    await this.blogsRepository.save(blog);
-
-    return blog._id.toString();
+    const updatedBlog = this.blogEntity.update({ blog, newValues: dto });
+    await this.blogsRepository.updateBlog_pg(updatedBlog);
   }
 
   async deleteBlog(id: string) {
-    const blog = await this.blogsRepository.findOrNotFoundFail(id);
+    const blog = await this.blogsRepository.findByIdOrNotFoundFail_pg(id);
 
-    blog.makeDeleted();
-
-    await this.blogsRepository.save(blog);
+    const deletedAt = new Date(Date.now()).toISOString();
+    await this.blogsRepository.deleteBlog_pg({ blogId: blog.id, deletedAt });
   }
 }

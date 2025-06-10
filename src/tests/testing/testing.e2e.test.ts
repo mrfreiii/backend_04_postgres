@@ -16,7 +16,7 @@ describe("delete all data", () => {
     const user = (await createTestUsers({}))[0];
 
     const userRes = await req
-      .get(SETTINGS.PATH.USERS)
+      .get(SETTINGS.PATH.USERS_ADMIN)
       .set("Authorization", testBasicAuthHeader)
       .expect(200);
 
@@ -38,7 +38,7 @@ describe("delete all data", () => {
     await req.delete(`${SETTINGS.PATH.TESTING}/all-data`).expect(204);
 
     const userRes = await req
-      .get(SETTINGS.PATH.USERS)
+      .get(SETTINGS.PATH.USERS_ADMIN)
       .set("Authorization", testBasicAuthHeader)
       .expect(200);
     expect(userRes.body.items.length).toBe(0);

@@ -1,4 +1,3 @@
-import { UserDocument } from "../../domain/user.entity";
 import { UserEntity } from "../../domain/user.entity.pg";
 
 export class UserViewDtoPg {

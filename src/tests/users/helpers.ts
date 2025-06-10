@@ -24,7 +24,7 @@ export const createTestUsers = async ({
     };
 
     const res = await req
-      .post(SETTINGS.PATH.USERS)
+      .post(SETTINGS.PATH.USERS_ADMIN)
       .set("Authorization", testBasicAuthHeader)
       .send(user)
       .expect(201);

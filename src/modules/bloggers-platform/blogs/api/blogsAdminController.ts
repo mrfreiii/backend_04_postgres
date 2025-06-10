@@ -33,11 +33,12 @@ import { JwtOptionalAuthGuard } from "../../../user-accounts/guards/bearer/jwt-o
 import { ExtractUserIfExistsFromRequest } from "../../../user-accounts/guards/decorators/param/extract-user-if-exists-from-request.decorator";
 import { UserContextDto } from "../../../user-accounts/guards/dto/user-context.dto";
 import { CreatePostByBlogIdInputDto } from "./input-dto/create-post-by-blog-id.input-dto";
+import { BlogViewDtoPg } from "./view-dto/blogs.view-dto.pg";
 
-@Controller(SETTINGS.PATH.BLOGS)
+@Controller(SETTINGS.PATH.BLOGS_ADMIN)
 @UseGuards(BasicAuthGuard)
 @ApiBasicAuth("basicAuth")
-export class BlogsController {
+export class BlogsAdminController {
   constructor(
     private blogsQueryRepository: BlogsQueryRepository,
     private blogsService: BlogsService,
@@ -45,44 +46,41 @@ export class BlogsController {
     private postsQueryRepository: PostsQueryRepository,
   ) {}
 
-  // @Public()
-  // @Get()
-  // async getAllBlogs(
-  //   @Query() query: GetBlogsQueryParams,
-  // ): Promise<PaginatedViewDto<BlogViewDto[]>> {
-  //   return this.blogsQueryRepository.getAll(query);
-  // }
-  //
-  // @Post()
-  // async createBlog(@Body() body: CreateBlogInputDto): Promise<BlogViewDto> {
-  //   const blogId = await this.blogsService.createBlog(body);
-  //
-  //   return this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
-  // }
-  //
+  @Get()
+  async getAllBlogs(
+    @Query() query: GetBlogsQueryParams,
+  ): Promise<PaginatedViewDto<BlogViewDtoPg[]>> {
+    return this.blogsQueryRepository.getAll_pg(query);
+  }
+
+  @Post()
+  async createBlog(@Body() body: CreateBlogInputDto): Promise<BlogViewDtoPg> {
+    const blogId = await this.blogsService.createBlog(body);
+
+    return this.blogsQueryRepository.getByIdOrNotFoundFail_pg(blogId);
+  }
+
+  @Put(":id")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updateBlog(
+    @Param("id") id: string,
+    @Body() body: UpdateBlogInputDto,
+  ): Promise<void> {
+    return this.blogsService.updateBlog({ id, dto: body });
+  }
+
+  @ApiParam({ name: "id" })
+  @Delete(":id")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteBlog(@Param("id") id: string): Promise<void> {
+    return this.blogsService.deleteBlog(id);
+  }
+
   // @Public()
   // @ApiParam({ name: "id" })
   // @Get(":id")
   // async getBlogById(@Param("id") id: string): Promise<BlogViewDto> {
   //   return this.blogsQueryRepository.getByIdOrNotFoundFail(id);
-  // }
-  //
-  // @Put(":id")
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // async updateBlog(
-  //   @Param("id") id: string,
-  //   @Body() body: UpdateBlogInputDto,
-  // ): Promise<BlogViewDto> {
-  //   const blogId = await this.blogsService.updateBlog({ id, dto: body });
-  //
-  //   return this.blogsQueryRepository.getByIdOrNotFoundFail(blogId);
-  // }
-  //
-  // @ApiParam({ name: "id" })
-  // @Delete(":id")
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // async deleteBlog(@Param("id") id: string): Promise<void> {
-  //   return this.blogsService.deleteBlog(id);
   // }
   //
   // @ApiBearerAuth()

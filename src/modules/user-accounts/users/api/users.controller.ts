@@ -24,7 +24,7 @@ import { UsersQueryRepository } from "../infrastructure/query/users.query-reposi
 import { CreateUserCommand } from "../application/usecases/create-user.usecase";
 import { DeleteUserCommand } from "../application/usecases/delete-user.usecase";
 
-@Controller(SETTINGS.PATH.USERS)
+@Controller(SETTINGS.PATH.USERS_ADMIN)
 @UseGuards(BasicAuthGuard)
 @ApiBasicAuth("basicAuth")
 export class UsersController {

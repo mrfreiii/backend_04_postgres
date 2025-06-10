@@ -1,8 +1,8 @@
 export const SETTINGS = {
   PATH: {
     AUTH: "/auth",
-    USERS: "/sa/users",
-    BLOGS: "/blogs",
+    USERS_ADMIN: "/sa/users",
+    BLOGS_ADMIN: "/sa/blogs",
     POSTS: "/posts",
     COMMENTS: "/comments",
     TESTING: "/testing",
@@ -12,6 +12,7 @@ export const SETTINGS = {
     USERS: 'public."Users"',
     USERS_REGISTRATION_INFO: 'public."UsersRegistrationInfo"',
     USERS_PASSWORD_RECOVERY_INFO: 'public."UsersPasswordRecoveryInfo"',
+    BLOGS: 'public."Blogs"',
     SESSIONS: 'public."Sessions"',
     RATE_LIMIT: 'public."RateLimits"',
   },

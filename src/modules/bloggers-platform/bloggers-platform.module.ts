@@ -3,8 +3,9 @@ import { MongooseModule } from "@nestjs/mongoose";
 
 import { UserAccountsModule } from "../user-accounts/user-accounts.module";
 
+import { BlogEntity } from "./blogs/domain/blog.entity.pg";
 import { Blog, BlogSchema } from "./blogs/domain/blog.entity";
-import { BlogsController } from "./blogs/api/blogs.controller";
+import { BlogsAdminController } from "./blogs/api/blogsAdminController";
 import { BlogsService } from "./blogs/application/blogs.service";
 import { BlogsRepository } from "./blogs/infrastructure/blogs.repository";
 import { BlogsQueryRepository } from "./blogs/infrastructure/query/blogs.query-repository";
@@ -27,32 +28,34 @@ import { LikesService } from "./likes/application/likes.service";
 import { LikesRepository } from "./likes/infrastructure/likes.repository";
 import { LikesQueryRepository } from "./likes/infrastructure/query/likes.query-repository";
 
+
+const schemas = [
+  { name: Blog.name, schema: BlogSchema },
+  { name: Post.name, schema: PostSchema },
+  { name: Comment.name, schema: CommentSchema },
+  { name: Like.name, schema: LikeSchema },
+];
+
+const services = [BlogsService, PostsService, CommentsService, LikesService];
+
+const repos = [
+  BlogsRepository,
+  BlogsQueryRepository,
+  BlogsExternalQueryRepository,
+  PostsRepository,
+  PostsQueryRepository,
+  CommentsRepository,
+  CommentsQueryRepository,
+  LikesRepository,
+  LikesQueryRepository,
+];
+
+const entities = [BlogEntity];
+
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: Blog.name, schema: BlogSchema },
-      { name: Post.name, schema: PostSchema },
-      { name: Comment.name, schema: CommentSchema },
-      { name: Like.name, schema: LikeSchema },
-    ]),
-    UserAccountsModule,
-  ],
-  controllers: [BlogsController, PostsController, CommentsController],
-  providers: [
-    BlogsService,
-    BlogsRepository,
-    BlogsQueryRepository,
-    BlogsExternalQueryRepository,
-    PostsService,
-    PostsRepository,
-    PostsQueryRepository,
-    CommentsService,
-    CommentsRepository,
-    CommentsQueryRepository,
-    LikesService,
-    LikesRepository,
-    LikesQueryRepository,
-  ],
+  imports: [MongooseModule.forFeature([...schemas]), UserAccountsModule],
+  controllers: [BlogsAdminController, PostsController, CommentsController],
+  providers: [...services, ...repos, ...entities],
   exports: [],
 })
 export class BloggersPlatformModule {}

@@ -14,7 +14,7 @@ describe("create user /users", () => {
   connectToTestDBAndClearRepositories();
 
   it("should return 401 for request without basic auth header", async () => {
-    await req.post(SETTINGS.PATH.USERS).send({}).expect(401);
+    await req.post(SETTINGS.PATH.USERS_ADMIN).send({}).expect(401);
   });
 
   it("should create a user", async () => {
@@ -25,7 +25,7 @@ describe("create user /users", () => {
     };
 
     const res = await req
-      .post(SETTINGS.PATH.USERS)
+      .post(SETTINGS.PATH.USERS_ADMIN)
       .set("Authorization", testBasicAuthHeader)
       .send(newUser)
       .expect(201);
@@ -45,7 +45,7 @@ describe("create user /users", () => {
       email: "user1@email.com",
     };
     await req
-      .post(SETTINGS.PATH.USERS)
+      .post(SETTINGS.PATH.USERS_ADMIN)
       .set("Authorization", testBasicAuthHeader)
       .send(newUser1)
       .expect(201);
@@ -57,7 +57,7 @@ describe("create user /users", () => {
     };
 
     const res = await req
-      .post(SETTINGS.PATH.USERS)
+      .post(SETTINGS.PATH.USERS_ADMIN)
       .set("Authorization", testBasicAuthHeader)
       .send(newUser2)
       .expect(400);
@@ -78,7 +78,7 @@ describe("create user /users", () => {
       email: "user111@email.com",
     };
     await req
-      .post(SETTINGS.PATH.USERS)
+      .post(SETTINGS.PATH.USERS_ADMIN)
       .set("Authorization", testBasicAuthHeader)
       .send(newUser1)
       .expect(201);
@@ -90,7 +90,7 @@ describe("create user /users", () => {
     };
 
     const res = await req
-      .post(SETTINGS.PATH.USERS)
+      .post(SETTINGS.PATH.USERS_ADMIN)
       .set("Authorization", testBasicAuthHeader)
       .send(newUser2)
       .expect(400);
@@ -111,12 +111,12 @@ describe("get all /users", () => {
   let createdUsers: UserViewDto[] = [];
 
   it("should return 401 for request without basic auth header", async () => {
-    await req.get(SETTINGS.PATH.USERS).expect(401);
+    await req.get(SETTINGS.PATH.USERS_ADMIN).expect(401);
   });
 
   it("should get empty array", async () => {
     const res = await req
-      .get(SETTINGS.PATH.USERS)
+      .get(SETTINGS.PATH.USERS_ADMIN)
       .set("Authorization", testBasicAuthHeader)
       .expect(200);
 
@@ -131,7 +131,7 @@ describe("get all /users", () => {
     createdUsers = await createTestUsers({ count: 2 });
 
     const res = await req
-      .get(SETTINGS.PATH.USERS)
+      .get(SETTINGS.PATH.USERS_ADMIN)
       .set("Authorization", testBasicAuthHeader)
       .expect(200);
 
@@ -151,7 +151,7 @@ describe("get all /users", () => {
     const queryString = convertObjectToQueryString(query);
 
     const res = await req
-      .get(`${SETTINGS.PATH.USERS}${queryString}`)
+      .get(`${SETTINGS.PATH.USERS_ADMIN}${queryString}`)
       .set("Authorization", testBasicAuthHeader)
       .expect(200);
 
@@ -174,7 +174,7 @@ describe("delete user by id /users", () => {
     userForDeletion = (await createTestUsers({}))[0];
 
     const res = await req
-      .get(SETTINGS.PATH.USERS)
+      .get(SETTINGS.PATH.USERS_ADMIN)
       .set("Authorization", testBasicAuthHeader)
       .expect(200);
 
@@ -182,24 +182,24 @@ describe("delete user by id /users", () => {
   });
 
   it("should return 401 for request without basic auth header", async () => {
-    await req.delete(`${SETTINGS.PATH.USERS}/77777`).expect(401);
+    await req.delete(`${SETTINGS.PATH.USERS_ADMIN}/77777`).expect(401);
   });
 
   it("should return 404 for non existent user", async () => {
     await req
-      .delete(`${SETTINGS.PATH.USERS}/77777`)
+      .delete(`${SETTINGS.PATH.USERS_ADMIN}/77777`)
       .set("Authorization", testBasicAuthHeader)
       .expect(404);
   });
 
   it("should delete user and get empty array", async () => {
     await req
-      .delete(`${SETTINGS.PATH.USERS}/${userForDeletion?.id}`)
+      .delete(`${SETTINGS.PATH.USERS_ADMIN}/${userForDeletion?.id}`)
       .set("Authorization", testBasicAuthHeader)
       .expect(204);
 
     const res = await req
-      .get(SETTINGS.PATH.USERS)
+      .get(SETTINGS.PATH.USERS_ADMIN)
       .set("Authorization", testBasicAuthHeader)
       .expect(200);
 

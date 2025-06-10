@@ -16,7 +16,7 @@ export const createTestBlogs = async (
     };
 
     const res = await req
-      .post(SETTINGS.PATH.BLOGS)
+      .post(SETTINGS.PATH.BLOGS_ADMIN)
       .set("Authorization", testBasicAuthHeader)
       .send(blog)
       .expect(201);
