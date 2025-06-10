@@ -44,132 +44,132 @@ export class PostsController {
     private postsService: PostsService,
     private commentsService: CommentsService,
   ) {}
-
-  @ApiBearerAuth()
-  @UseGuards(JwtOptionalAuthGuard)
-  @Get()
-  async getAll(
-    @Query() query: GetPostsQueryParams,
-    @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
-  ): Promise<PaginatedViewDto<PostViewDto[]>> {
-    const allPosts = await this.postsQueryRepository.getAll({
-      query,
-    });
-
-    if (user?.id) {
-      allPosts.items = await this.postsService.getLikeStatusesForPosts({
-        userId: user.id,
-        posts: allPosts.items,
-      });
-    }
-
-    return allPosts;
-  }
-
-  @UseGuards(BasicAuthGuard)
-  @ApiBasicAuth("basicAuth")
-  @Post()
-  async createPost(@Body() body: CreatePostInputDto): Promise<PostViewDto> {
-    const postId = await this.postsService.createPost(body);
-
-    return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtOptionalAuthGuard)
-  @ApiParam({ name: "id" })
-  @Get(":postId")
-  async getById(
-    @Param("postId") postId: string,
-    @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
-  ): Promise<PostViewDto> {
-    return this.postsService.getPostById({
-      postId,
-      userId: user?.id || null,
-    });
-  }
-
-  @UseGuards(BasicAuthGuard)
-  @ApiBasicAuth("basicAuth")
-  @Put(":id")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async updatePost(
-    @Param("id") id: string,
-    @Body() body: UpdatePostInputDto,
-  ): Promise<PostViewDto> {
-    const postId = await this.postsService.updatePost({ id, dto: body });
-
-    return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
-  }
-
-  @UseGuards(BasicAuthGuard)
-  @ApiBasicAuth("basicAuth")
-  @ApiParam({ name: "id" })
-  @Delete(":id")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deletePost(@Param("id") id: string): Promise<void> {
-    return this.postsService.deletePost(id);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @Post(":id/comments")
-  async createCommentByPostId(
-    @Param("id") id: string,
-    @Body() body: CreateCommentByPostIdInputDto,
-    @ExtractUserFromRequest() user: UserContextDto,
-  ): Promise<CommentViewDto> {
-    await this.postsQueryRepository.getByIdOrNotFoundFail(id);
-
-    const commentId = await this.commentsService.createComment({
-      content: body.content,
-      postId: id,
-      userId: user.id,
-    });
-
-    return this.commentsQueryRepository.getByIdOrNotFoundFail(commentId);
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JwtOptionalAuthGuard)
-  @Get(":id/comments")
-  async getCommentsByPostId(
-    @Query() query: GetCommentsQueryParams,
-    @Param("id") id: string,
-    @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
-  ): Promise<PaginatedViewDto<CommentViewDto[]>> {
-    await this.postsQueryRepository.getByIdOrNotFoundFail(id);
-
-    const allComments = await this.commentsQueryRepository.getAll({
-      query,
-      postId: id,
-    });
-
-    if (user?.id) {
-      allComments.items = await this.commentsService.getLikeStatusesForComments(
-        {
-          userId: user.id,
-          comments: allComments.items,
-        },
-      );
-    }
-
-    return allComments;
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @Put(":postId/like-status")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async updatePostLikeStatus(
-    @Param("postId") postId: string,
-    @Body() body: UpdateLikeStatusInputDto,
-    @ExtractUserFromRequest() user: UserContextDto,
-  ): Promise<void> {
-    return this.postsService.updatePostLikeStatus({
-      userId: user.id,
-      postId,
-      newLikeStatus: body.likeStatus,
-    });
-  }
+  //
+  // @ApiBearerAuth()
+  // @UseGuards(JwtOptionalAuthGuard)
+  // @Get()
+  // async getAll(
+  //   @Query() query: GetPostsQueryParams,
+  //   @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
+  // ): Promise<PaginatedViewDto<PostViewDto[]>> {
+  //   const allPosts = await this.postsQueryRepository.getAll({
+  //     query,
+  //   });
+  //
+  //   if (user?.id) {
+  //     allPosts.items = await this.postsService.getLikeStatusesForPosts({
+  //       userId: user.id,
+  //       posts: allPosts.items,
+  //     });
+  //   }
+  //
+  //   return allPosts;
+  // }
+  //
+  // @UseGuards(BasicAuthGuard)
+  // @ApiBasicAuth("basicAuth")
+  // @Post()
+  // async createPost(@Body() body: CreatePostInputDto): Promise<PostViewDto> {
+  //   const postId = await this.postsService.createPost(body);
+  //
+  //   return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
+  // }
+  //
+  // @ApiBearerAuth()
+  // @UseGuards(JwtOptionalAuthGuard)
+  // @ApiParam({ name: "id" })
+  // @Get(":postId")
+  // async getById(
+  //   @Param("postId") postId: string,
+  //   @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
+  // ): Promise<PostViewDto> {
+  //   return this.postsService.getPostById({
+  //     postId,
+  //     userId: user?.id || null,
+  //   });
+  // }
+  //
+  // @UseGuards(BasicAuthGuard)
+  // @ApiBasicAuth("basicAuth")
+  // @Put(":id")
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async updatePost(
+  //   @Param("id") id: string,
+  //   @Body() body: UpdatePostInputDto,
+  // ): Promise<PostViewDto> {
+  //   const postId = await this.postsService.updatePost({ id, dto: body });
+  //
+  //   return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
+  // }
+  //
+  // @UseGuards(BasicAuthGuard)
+  // @ApiBasicAuth("basicAuth")
+  // @ApiParam({ name: "id" })
+  // @Delete(":id")
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async deletePost(@Param("id") id: string): Promise<void> {
+  //   return this.postsService.deletePost(id);
+  // }
+  //
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @Post(":id/comments")
+  // async createCommentByPostId(
+  //   @Param("id") id: string,
+  //   @Body() body: CreateCommentByPostIdInputDto,
+  //   @ExtractUserFromRequest() user: UserContextDto,
+  // ): Promise<CommentViewDto> {
+  //   await this.postsQueryRepository.getByIdOrNotFoundFail(id);
+  //
+  //   const commentId = await this.commentsService.createComment({
+  //     content: body.content,
+  //     postId: id,
+  //     userId: user.id,
+  //   });
+  //
+  //   return this.commentsQueryRepository.getByIdOrNotFoundFail(commentId);
+  // }
+  //
+  // @ApiBearerAuth()
+  // @UseGuards(JwtOptionalAuthGuard)
+  // @Get(":id/comments")
+  // async getCommentsByPostId(
+  //   @Query() query: GetCommentsQueryParams,
+  //   @Param("id") id: string,
+  //   @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
+  // ): Promise<PaginatedViewDto<CommentViewDto[]>> {
+  //   await this.postsQueryRepository.getByIdOrNotFoundFail(id);
+  //
+  //   const allComments = await this.commentsQueryRepository.getAll({
+  //     query,
+  //     postId: id,
+  //   });
+  //
+  //   if (user?.id) {
+  //     allComments.items = await this.commentsService.getLikeStatusesForComments(
+  //       {
+  //         userId: user.id,
+  //         comments: allComments.items,
+  //       },
+  //     );
+  //   }
+  //
+  //   return allComments;
+  // }
+  //
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @Put(":postId/like-status")
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // async updatePostLikeStatus(
+  //   @Param("postId") postId: string,
+  //   @Body() body: UpdateLikeStatusInputDto,
+  //   @ExtractUserFromRequest() user: UserContextDto,
+  // ): Promise<void> {
+  //   return this.postsService.updatePostLikeStatus({
+  //     userId: user.id,
+  //     postId,
+  //     newLikeStatus: body.likeStatus,
+  //   });
+  // }
 }

@@ -88,7 +88,7 @@ export class Post {
     post.shortDescription = dto.shortDescription;
     post.content = dto.content;
     post.blogId = dto.blogId;
-    post.blogName = dto.blogName;
+    post.blogName = dto.blogName!;
     post.extendedLikesInfo = {
       likesCount: 0,
       dislikesCount: 0,

@@ -4,7 +4,7 @@ import {
   testBasicAuthHeader,
 } from "../helpers";
 import { SETTINGS } from "../../settings";
-import { createTestBlogs } from "./helpers";
+import { createTestBlogs, createTestPostsByBlog } from "./helpers";
 import { createTestPosts } from "../posts/helpers";
 import { convertObjectToQueryString } from "../../utils/convertObjectToQueryString";
 import { SortDirection } from "../../core/dto/base.query-params.input-dto";
@@ -16,6 +16,9 @@ import { UserViewDto } from "../../modules/user-accounts/users/api/view-dto/user
 import { PostViewDto } from "../../modules/bloggers-platform/posts/api/view-dto/posts.view-dto";
 import { createTestUsers, getUsersJwtTokens } from "../users/helpers";
 import { CreatePostByBlogIdInputDto } from "../../modules/bloggers-platform/blogs/api/input-dto/create-post-by-blog-id.input-dto";
+import { BlogViewDtoPg } from "../../modules/bloggers-platform/blogs/api/view-dto/blogs.view-dto.pg";
+import { PostViewDtoPg } from "../../modules/bloggers-platform/posts/api/view-dto/posts.view-dto.pg";
+import { UpdatePostByBlogInputDto } from "../../modules/bloggers-platform/blogs/api/input-dto/update-post-by-blog.input-dto";
 
 describe("create blog /sa/blogs", () => {
   connectToTestDBAndClearRepositories();
@@ -82,7 +85,7 @@ describe("create blog /sa/blogs", () => {
 describe("get all blogs /sa/blogs", () => {
   connectToTestDBAndClearRepositories();
 
-  let createdBlogs: BlogViewDto[] = [];
+  let createdBlogs: BlogViewDtoPg[] = [];
 
   it("should return 401 for unauthorized user", async () => {
     await req.get(SETTINGS.PATH.BLOGS_ADMIN).expect(401);
@@ -322,6 +325,375 @@ describe("delete blog by id /blogs/:id", () => {
   });
 });
 
+describe("create post by blogId /blogs/:id/posts", () => {
+  connectToTestDBAndClearRepositories();
+
+  it("should return 401 for unauthorized user", async () => {
+    await req
+      .post(`${SETTINGS.PATH.BLOGS_ADMIN}/123777/posts`)
+      .send({})
+      .expect(401);
+  });
+
+  it("should return 400 for invalid values", async () => {
+    const newPost: Omit<CreatePostByBlogIdInputDto, "shortDescription"> = {
+      title: "length_31-DrmM8lHeNjSykwSzQ7Her",
+      content: "valid",
+    };
+
+    const res = await req
+      .post(`${SETTINGS.PATH.BLOGS_ADMIN}/123777/posts`)
+      .set("Authorization", testBasicAuthHeader)
+      .send(newPost)
+      .expect(400);
+
+    expect(res.body.errorsMessages).toEqual([
+      {
+        field: "title",
+        message:
+          "title must be shorter than or equal to 30 characters; Received value: length_31-DrmM8lHeNjSykwSzQ7Her",
+      },
+      {
+        field: "shortDescription",
+        message:
+          "shortDescription must be longer than or equal to 1 characters; Received value: undefined",
+      },
+    ]);
+  });
+
+  it("should return 404 for non existent blog", async () => {
+    const newPost: CreatePostByBlogIdInputDto = {
+      title: "title",
+      content: "content",
+      shortDescription: "shortDescription",
+    };
+
+    const res = await req
+      .post(`${SETTINGS.PATH.BLOGS_ADMIN}/123777/posts`)
+      .set("Authorization", testBasicAuthHeader)
+      .send(newPost)
+      .expect(404);
+
+    expect(res.body.errorsMessages[0]).toEqual({
+      field: "",
+      message: "Blog not found",
+    });
+  });
+
+  it("should create a post", async () => {
+    const createdBlog = (await createTestBlogs())[0];
+
+    const newPost: Omit<CreatePostInputDto, "blogId"> = {
+      title: "title1",
+      shortDescription: "shortDescription1",
+      content: "content1",
+    };
+
+    const res = await req
+      .post(`${SETTINGS.PATH.BLOGS_ADMIN}/${createdBlog?.id}/posts`)
+      .set("Authorization", testBasicAuthHeader)
+      .send(newPost)
+      .expect(201);
+
+    expect(res.body).toEqual({
+      ...newPost,
+      id: expect.any(String),
+      blogId: createdBlog?.id,
+      blogName: createdBlog?.name,
+      createdAt: expect.any(String),
+      extendedLikesInfo: {
+        dislikesCount: 0,
+        likesCount: 0,
+        myStatus: "None",
+        newestLikes: [],
+      },
+    });
+  });
+});
+
+describe("get posts by blogId /blogs/:id/posts", () => {
+  connectToTestDBAndClearRepositories();
+
+  let createdPosts: PostViewDtoPg[];
+
+  beforeAll(async () => {
+    createdPosts = await createTestPostsByBlog(2);
+  });
+
+  // let user: UserViewDto;
+  // let userToken: string;
+  // let createdPosts: PostViewDto[];
+  //
+  // beforeAll(async () => {
+  // const createdUsers = await createTestUsers({});
+  // user = createdUsers[0];
+  //
+  // const usersTokens = await getUsersJwtTokens(createdUsers);
+  // userToken = usersTokens[0];
+  //
+  // const createdBlog = (await createTestBlogs())[0];
+  // createdPosts = await createTestPosts({ blogId: createdBlog.id, count: 2 });
+  //
+  // await req
+  //   .put(`${SETTINGS.PATH.POSTS}/${createdPosts[0].id}/like-status`)
+  //   .set("Authorization", `Bearer ${userToken}`)
+  //   .send({ likeStatus: "Like" })
+  //   .expect(204);
+  // });
+
+  it("should return 401 for unauthorized user", async () => {
+    await req
+      .get(`${SETTINGS.PATH.BLOGS_ADMIN}/123777/posts`)
+      .send({})
+      .expect(401);
+  });
+
+  it("should return 404 for non existent blog", async () => {
+    const res = await req
+      .get(`${SETTINGS.PATH.BLOGS_ADMIN}/123777/posts`)
+      .set("Authorization", testBasicAuthHeader)
+      .expect(404);
+
+    expect(res.body.errorsMessages[0]).toEqual({
+      field: "",
+      message: "Blog not found",
+    });
+  });
+
+  it("should get posts with 'None' like-status for all posts for unauthorized user", async () => {
+    const res = await req
+      .get(`${SETTINGS.PATH.BLOGS_ADMIN}/${createdPosts[0].blogId}/posts`)
+      .set("Authorization", testBasicAuthHeader)
+      .expect(200);
+
+    expect(res.body.pagesCount).toBe(1);
+    expect(res.body.page).toBe(1);
+    expect(res.body.pageSize).toBe(10);
+    expect(res.body.totalCount).toBe(2);
+    expect(res.body.items.length).toBe(2);
+
+    expect(res.body.items).toEqual([createdPosts[1], createdPosts[0]]);
+  });
+  //
+  // it("should get posts with 'Like' like-status for liked post for authorized user", async () => {
+  //   const res = await req
+  //     .get(`${SETTINGS.PATH.BLOGS_ADMIN}/${createdPosts[0]?.blogId}/posts`)
+  //     .set("Authorization", `Bearer ${userToken}`)
+  //     .expect(200);
+  //
+  //   expect(res.body.pagesCount).toBe(1);
+  //   expect(res.body.page).toBe(1);
+  //   expect(res.body.pageSize).toBe(10);
+  //   expect(res.body.totalCount).toBe(2);
+  //   expect(res.body.items.length).toBe(2);
+  //
+  //   expect(res.body.items).toEqual([
+  //     createdPosts[1],
+  //     {
+  //       ...createdPosts[0],
+  //       extendedLikesInfo: {
+  //         likesCount: 1,
+  //         dislikesCount: 0,
+  //         myStatus: "Like",
+  //         newestLikes: [
+  //           {
+  //             addedAt: expect.any(String),
+  //             login: user.login,
+  //             userId: user.id,
+  //           },
+  //         ],
+  //       },
+  //     },
+  //   ]);
+  // });
+});
+
+describe("update post by blog id /blogs/:blogId/posts/:postId", () => {
+  connectToTestDBAndClearRepositories();
+
+  it("should return 401 for unauthorized user", async () => {
+    await req
+      .put(`${SETTINGS.PATH.BLOGS_ADMIN}/7777/posts/5555`)
+      .send({})
+      .expect(401);
+  });
+
+  it("should return 400 for invalid values", async () => {
+    const updatedPost: {
+      title: null;
+      shortDescription: null;
+      content: null;
+    } = {
+      title: null,
+      shortDescription: null,
+      content: null,
+    };
+
+    const res = await req
+      .put(`${SETTINGS.PATH.BLOGS_ADMIN}/77777/posts/5555`)
+      .set("Authorization", testBasicAuthHeader)
+      .send(updatedPost)
+      .expect(400);
+
+    expect(res.body.errorsMessages.length).toBe(3);
+    expect(res.body.errorsMessages).toEqual([
+      {
+        field: "title",
+        message:
+          "title must be longer than or equal to 1 characters; Received value: null",
+      },
+      {
+        field: "shortDescription",
+        message:
+          "shortDescription must be longer than or equal to 1 characters; Received value: null",
+      },
+      {
+        field: "content",
+        message:
+          "content must be longer than or equal to 1 characters; Received value: null",
+      },
+    ]);
+  });
+
+  it("should return 404 for non existent blog", async () => {
+    const updatedPost: UpdatePostByBlogInputDto = {
+      title: "new title",
+      shortDescription: "new description",
+      content: "new content",
+    };
+
+    const res = await req
+      .put(`${SETTINGS.PATH.BLOGS_ADMIN}/77777/posts/5555`)
+      .set("Authorization", testBasicAuthHeader)
+      .send(updatedPost)
+      .expect(404);
+
+    expect(res.body.errorsMessages[0]).toEqual({
+      field: "",
+      message: "Blog not found",
+    });
+  });
+
+  it("should return 404 for non existent post", async () => {
+    const createdBlog = (await createTestBlogs())[0];
+
+    const updatedPost: UpdatePostByBlogInputDto = {
+      title: "new title",
+      shortDescription: "new description",
+      content: "new content",
+    };
+
+    const res = await req
+      .put(`${SETTINGS.PATH.BLOGS_ADMIN}/${createdBlog.id}/posts/5555`)
+      .set("Authorization", testBasicAuthHeader)
+      .send(updatedPost)
+      .expect(404);
+
+    expect(res.body.errorsMessages[0]).toEqual({
+      field: "",
+      message: "Post not found",
+    });
+  });
+
+  it("should update a post", async () => {
+    const createdPost = (await createTestPostsByBlog())[0];
+
+    const updatedPost: UpdatePostByBlogInputDto = {
+      title: "new new title",
+      shortDescription: "new new description",
+      content: "new new content",
+    };
+
+    await req
+      .put(
+        `${SETTINGS.PATH.BLOGS_ADMIN}/${createdPost.blogId}/posts/${createdPost?.id}`,
+      )
+      .set("Authorization", testBasicAuthHeader)
+      .send(updatedPost)
+      .expect(204);
+
+    const res = await req
+      .get(`${SETTINGS.PATH.BLOGS_ADMIN}/${createdPost.blogId}/posts`)
+      .set("Authorization", testBasicAuthHeader)
+      .expect(200);
+
+    expect(res.body.items[0]).toEqual({
+      ...updatedPost,
+      id: createdPost.id,
+      blogId: createdPost.blogId,
+      blogName: createdPost.blogName,
+      createdAt: createdPost.createdAt,
+      extendedLikesInfo: {
+        dislikesCount: 0,
+        likesCount: 0,
+        myStatus: "None",
+        newestLikes: [],
+      },
+    });
+  });
+});
+
+describe("delete post by blog id /blogs/:blogId/posts/:postId", () => {
+  connectToTestDBAndClearRepositories();
+
+  let postForDeletion: PostViewDto;
+
+  it("should return 401 for unauthorized user", async () => {
+    await req
+      .delete(`${SETTINGS.PATH.BLOGS_ADMIN}/7777/posts/5555`)
+      .expect(401);
+  });
+
+  it("should return 404 for non existent blog", async () => {
+    const res = await req
+      .delete(`${SETTINGS.PATH.BLOGS_ADMIN}/77777/posts/5555`)
+      .set("Authorization", testBasicAuthHeader)
+      .expect(404);
+
+    expect(res.body.errorsMessages[0]).toEqual({
+      field: "",
+      message: "Blog not found",
+    });
+  });
+
+  it("should return 404 for non existent post", async () => {
+    const createdBlog = (await createTestBlogs())[0];
+
+    const res = await req
+      .delete(`${SETTINGS.PATH.BLOGS_ADMIN}/${createdBlog.id}/posts/5555`)
+      .set("Authorization", testBasicAuthHeader)
+      .expect(404);
+
+    expect(res.body.errorsMessages[0]).toEqual({
+      field: "",
+      message: "Post not found",
+    });
+  });
+
+  it("should delete a post", async () => {
+    const createdPost = (await createTestPostsByBlog())[0];
+
+    const resBefore = await req
+      .get(`${SETTINGS.PATH.BLOGS_ADMIN}/${createdPost.blogId}/posts`)
+      .set("Authorization", testBasicAuthHeader)
+      .expect(200);
+    expect(resBefore.body.items[0]).toEqual(createdPost);
+
+    await req
+      .delete(
+        `${SETTINGS.PATH.BLOGS_ADMIN}/${createdPost.blogId}/posts/${createdPost?.id}`,
+      )
+      .set("Authorization", testBasicAuthHeader)
+      .expect(204);
+
+    const resAfter = await req
+      .get(`${SETTINGS.PATH.BLOGS_ADMIN}/${createdPost.blogId}/posts`)
+      .set("Authorization", testBasicAuthHeader)
+      .expect(200);
+    expect(resAfter.body.items.length).toBe(0);
+  });
+});
+
 // describe("get blog by id /blogs/:id", () => {
 //   connectToTestDBAndClearRepositories();
 //
@@ -342,187 +714,5 @@ describe("delete blog by id /blogs/:id", () => {
 //       .expect(200);
 //
 //     expect(res.body).toEqual(createdBlog);
-//   });
-// });
-
-// describe("get posts by blogId /blogs/:id/posts", () => {
-//   connectToTestDBAndClearRepositories();
-//
-//   let user: UserViewDto;
-//   let userToken: string;
-//   let createdPosts: PostViewDto[];
-//
-//   beforeAll(async () => {
-//     const createdUsers = await createTestUsers({});
-//     user = createdUsers[0];
-//
-//     const usersTokens = await getUsersJwtTokens(createdUsers);
-//     userToken = usersTokens[0];
-//
-//     const createdBlog = (await createTestBlogs())[0];
-//     createdPosts = await createTestPosts({ blogId: createdBlog.id, count: 2 });
-//
-//     await req
-//       .put(`${SETTINGS.PATH.POSTS}/${createdPosts[0].id}/like-status`)
-//       .set("Authorization", `Bearer ${userToken}`)
-//       .send({ likeStatus: "Like" })
-//       .expect(204);
-//   });
-//
-//   it("should return 404 for non existent blog", async () => {
-//     const res = await req
-//       .get(`${SETTINGS.PATH.BLOGS}/123777/posts`)
-//       .expect(404);
-//
-//     expect(res.body.errorsMessages[0]).toEqual({
-//       field: "",
-//       message: "Blog not found",
-//     });
-//   });
-//
-//   it("should get posts with 'None' like-status for all posts for unauthorized user", async () => {
-//     const res = await req
-//       .get(`${SETTINGS.PATH.BLOGS}/${createdPosts[0]?.blogId}/posts`)
-//       .expect(200);
-//
-//     expect(res.body.pagesCount).toBe(1);
-//     expect(res.body.page).toBe(1);
-//     expect(res.body.pageSize).toBe(10);
-//     expect(res.body.totalCount).toBe(2);
-//     expect(res.body.items.length).toBe(2);
-//
-//     expect(res.body.items).toEqual([
-//       createdPosts[1],
-//       {
-//         ...createdPosts[0],
-//         extendedLikesInfo: {
-//           likesCount: 1,
-//           dislikesCount: 0,
-//           myStatus: "None",
-//           newestLikes: [
-//             {
-//               addedAt: expect.any(String),
-//               login: user.login,
-//               userId: user.id,
-//             },
-//           ],
-//         },
-//       },
-//     ]);
-//   });
-//
-//   it("should get posts with 'Like' like-status for liked post for authorized user", async () => {
-//     const res = await req
-//       .get(`${SETTINGS.PATH.BLOGS}/${createdPosts[0]?.blogId}/posts`)
-//       .set("Authorization", `Bearer ${userToken}`)
-//       .expect(200);
-//
-//     expect(res.body.pagesCount).toBe(1);
-//     expect(res.body.page).toBe(1);
-//     expect(res.body.pageSize).toBe(10);
-//     expect(res.body.totalCount).toBe(2);
-//     expect(res.body.items.length).toBe(2);
-//
-//     expect(res.body.items).toEqual([
-//       createdPosts[1],
-//       {
-//         ...createdPosts[0],
-//         extendedLikesInfo: {
-//           likesCount: 1,
-//           dislikesCount: 0,
-//           myStatus: "Like",
-//           newestLikes: [
-//             {
-//               addedAt: expect.any(String),
-//               login: user.login,
-//               userId: user.id,
-//             },
-//           ],
-//         },
-//       },
-//     ]);
-//   });
-// });
-//
-// describe("create post by blogId /blogs/:id/posts", () => {
-//   connectToTestDBAndClearRepositories();
-//
-//   it("should return 401 for unauthorized user", async () => {
-//     await req.post(`${SETTINGS.PATH.BLOGS}/123777/posts`).send({}).expect(401);
-//   });
-//
-//   it("should return 400 for invalid values", async () => {
-//     const newPost: Omit<CreatePostByBlogIdInputDto, "shortDescription"> = {
-//       title: "length_31-DrmM8lHeNjSykwSzQ7Her",
-//       content: "valid",
-//     };
-//
-//     const res = await req
-//       .post(`${SETTINGS.PATH.BLOGS}/123777/posts`)
-//       .set("Authorization", testBasicAuthHeader)
-//       .send(newPost)
-//       .expect(400);
-//
-//     expect(res.body.errorsMessages).toEqual([
-//       {
-//         field: "title",
-//         message:
-//           "title must be shorter than or equal to 30 characters; Received value: length_31-DrmM8lHeNjSykwSzQ7Her",
-//       },
-//       {
-//         field: "shortDescription",
-//         message:
-//           "shortDescription must be longer than or equal to 1 characters; Received value: undefined",
-//       },
-//     ]);
-//   });
-//
-//   it("should return 404 for non existent blog", async () => {
-//     const newPost: CreatePostByBlogIdInputDto = {
-//       title: "title",
-//       content: "content",
-//       shortDescription: "shortDescription",
-//     };
-//
-//     const res = await req
-//       .post(`${SETTINGS.PATH.BLOGS}/123777/posts`)
-//       .set("Authorization", testBasicAuthHeader)
-//       .send(newPost)
-//       .expect(404);
-//
-//     expect(res.body.errorsMessages[0]).toEqual({
-//       field: "",
-//       message: "Blog not found",
-//     });
-//   });
-//
-//   it("should create a post", async () => {
-//     const createdBlog = (await createTestBlogs())[0];
-//
-//     const newPost: Omit<CreatePostInputDto, "blogId"> = {
-//       title: "title1",
-//       shortDescription: "shortDescription1",
-//       content: "content1",
-//     };
-//
-//     const res = await req
-//       .post(`${SETTINGS.PATH.BLOGS}/${createdBlog?.id}/posts`)
-//       .set("Authorization", testBasicAuthHeader)
-//       .send(newPost)
-//       .expect(201);
-//
-//     expect(res.body).toEqual({
-//       ...newPost,
-//       id: expect.any(String),
-//       blogId: createdBlog?.id,
-//       blogName: createdBlog?.name,
-//       createdAt: expect.any(String),
-//       extendedLikesInfo: {
-//         dislikesCount: 0,
-//         likesCount: 0,
-//         myStatus: "None",
-//         newestLikes: [],
-//       },
-//     });
 //   });
 // });

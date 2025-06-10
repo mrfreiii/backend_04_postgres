@@ -34,6 +34,8 @@ import { ExtractUserIfExistsFromRequest } from "../../../user-accounts/guards/de
 import { UserContextDto } from "../../../user-accounts/guards/dto/user-context.dto";
 import { CreatePostByBlogIdInputDto } from "./input-dto/create-post-by-blog-id.input-dto";
 import { BlogViewDtoPg } from "./view-dto/blogs.view-dto.pg";
+import { PostViewDtoPg } from "../../posts/api/view-dto/posts.view-dto.pg";
+import { UpdatePostByBlogInputDto } from "./input-dto/update-post-by-blog.input-dto";
 
 @Controller(SETTINGS.PATH.BLOGS_ADMIN)
 @UseGuards(BasicAuthGuard)
@@ -76,48 +78,78 @@ export class BlogsAdminController {
     return this.blogsService.deleteBlog(id);
   }
 
+  @Post(":id/posts")
+  async createPostsByBlogId(
+    @Param("id") id: string,
+    @Body() body: CreatePostByBlogIdInputDto,
+  ): Promise<PostViewDtoPg> {
+    await this.blogsQueryRepository.getByIdOrNotFoundFail_pg(id);
+
+    const postId = await this.postsService.createPost({ ...body, blogId: id });
+
+    return this.postsQueryRepository.getByIdOrNotFoundFail_pg(postId);
+  }
+
+  // @ApiBearerAuth()
+  // @UseGuards(JwtOptionalAuthGuard)
+  // @Public()
+  @Get(":id/posts")
+  async getPostsByBlogId(
+    @Query() query: GetPostsQueryParams,
+    @Param("id") id: string,
+    // @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
+  ): Promise<PaginatedViewDto<PostViewDtoPg[]>> {
+    await this.blogsQueryRepository.getByIdOrNotFoundFail_pg(id);
+
+    // const allPosts = await this.postsQueryRepository.getAll({
+    //   query,
+    //   blogId: id,
+    // });
+    // if (user?.id) {
+    //   allPosts.items = await this.postsService.getLikeStatusesForPosts({
+    //     userId: user.id,
+    //     posts: allPosts.items,
+    //   });
+    // }
+
+    return this.postsQueryRepository.getAll_pg({
+      requestParams: query,
+      blogId: id,
+    });
+  }
+
+  @Put(":blogId/posts/:postId")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async updatePostByBlogId(
+    @Param("blogId") blogId: string,
+    @Param("postId") postId: string,
+    @Body() body: UpdatePostByBlogInputDto,
+  ): Promise<void> {
+    return this.postsService.updatePost({
+      id: postId,
+      dto: {
+        ...body,
+        blogId,
+      },
+    });
+  }
+
+  @Delete(":blogId/posts/:postId")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deletePostByBlogId(
+    @Param("blogId") blogId: string,
+    @Param("postId") postId: string,
+  ): Promise<void> {
+    return this.postsService.deletePost({
+      postId,
+      blogId,
+    });
+  }
+
   // @Public()
   // @ApiParam({ name: "id" })
   // @Get(":id")
   // async getBlogById(@Param("id") id: string): Promise<BlogViewDto> {
   //   return this.blogsQueryRepository.getByIdOrNotFoundFail(id);
-  // }
-  //
-  // @ApiBearerAuth()
-  // @UseGuards(JwtOptionalAuthGuard)
-  // @Public()
-  // @Get(":id/posts")
-  // async getPostsByBlogId(
-  //   @Query() query: GetPostsQueryParams,
-  //   @Param("id") id: string,
-  //   @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
-  // ): Promise<PaginatedViewDto<PostViewDto[]>> {
-  //   await this.blogsQueryRepository.getByIdOrNotFoundFail(id);
-  //
-  //   const allPosts = await this.postsQueryRepository.getAll({
-  //     query,
-  //     blogId: id,
-  //   });
-  //
-  //   if (user?.id) {
-  //     allPosts.items = await this.postsService.getLikeStatusesForPosts({
-  //       userId: user.id,
-  //       posts: allPosts.items,
-  //     });
-  //   }
-  //
-  //   return allPosts;
-  // }
-  //
-  // @Post(":id/posts")
-  // async createPostsByBlogId(
-  //   @Param("id") id: string,
-  //   @Body() body: CreatePostByBlogIdInputDto,
-  // ): Promise<PostViewDto> {
-  //   await this.blogsQueryRepository.getByIdOrNotFoundFail(id);
-  //
-  //   const postId = await this.postsService.createPost({ ...body, blogId: id });
-  //
-  //   return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
   // }
 }

@@ -11,6 +11,7 @@ import { BlogsRepository } from "./blogs/infrastructure/blogs.repository";
 import { BlogsQueryRepository } from "./blogs/infrastructure/query/blogs.query-repository";
 import { BlogsExternalQueryRepository } from "./blogs/infrastructure/external-query/blogs.external-query-repository";
 
+import { PostEntity } from "./posts/domain/post.entity.pg";
 import { Post, PostSchema } from "./posts/domain/post.entity";
 import { PostsController } from "./posts/api/posts.controller";
 import { PostsService } from "./posts/application/posts.service";
@@ -27,7 +28,6 @@ import { Like, LikeSchema } from "./likes/domain/like.entity";
 import { LikesService } from "./likes/application/likes.service";
 import { LikesRepository } from "./likes/infrastructure/likes.repository";
 import { LikesQueryRepository } from "./likes/infrastructure/query/likes.query-repository";
-
 
 const schemas = [
   { name: Blog.name, schema: BlogSchema },
@@ -50,7 +50,7 @@ const repos = [
   LikesQueryRepository,
 ];
 
-const entities = [BlogEntity];
+const entities = [BlogEntity, PostEntity];
 
 @Module({
   imports: [MongooseModule.forFeature([...schemas]), UserAccountsModule],

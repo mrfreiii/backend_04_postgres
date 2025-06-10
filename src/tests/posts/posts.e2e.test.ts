@@ -121,7 +121,7 @@ describe("mocked posts tests", ()=>{
 //     });
 //   });
 // });
-//
+
 // describe("get all /posts", () => {
 //   connectToTestDBAndClearRepositories();
 //
@@ -179,7 +179,7 @@ describe("mocked posts tests", ()=>{
 //     });
 //   });
 // });
-//
+
 // describe("get post by id /posts/:id", () => {
 //   connectToTestDBAndClearRepositories();
 //
@@ -206,7 +206,7 @@ describe("mocked posts tests", ()=>{
 //     });
 //   });
 // });
-//
+
 // describe("update post by id /posts/:id", () => {
 //   connectToTestDBAndClearRepositories();
 //
@@ -336,7 +336,7 @@ describe("mocked posts tests", ()=>{
 //     });
 //   });
 // });
-//
+
 // describe("delete post by id /posts/:id", () => {
 //   connectToTestDBAndClearRepositories();
 //
@@ -379,7 +379,7 @@ describe("mocked posts tests", ()=>{
 //     expect(checkRes.body.items.length).toBe(0);
 //   });
 // });
-//
+
 // describe("create comment by post id /posts/:id/comments", () => {
 //   connectToTestDBAndClearRepositories();
 //
@@ -465,7 +465,7 @@ describe("mocked posts tests", ()=>{
 //     });
 //   });
 // });
-//
+
 // describe("get comments by postId /posts", () => {
 //   connectToTestDBAndClearRepositories();
 //
@@ -534,7 +534,7 @@ describe("mocked posts tests", ()=>{
 //     });
 //   });
 // });
-//
+
 // describe("update post likes /posts/:postId/like-status", () => {
 //   connectToTestDBAndClearRepositories();
 //

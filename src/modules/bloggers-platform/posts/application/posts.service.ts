@@ -13,6 +13,8 @@ import { UpdatePostInputDto } from "../api/input-dto/update-post.input-dto";
 import { LikesRepository } from "../../likes/infrastructure/likes.repository";
 import { BlogsExternalQueryRepository } from "../../blogs/infrastructure/external-query/blogs.external-query-repository";
 import { GetLikesStatusesForPostsDto } from "./dto/get-all-post.dto";
+import { BlogsRepository } from "../../blogs/infrastructure/blogs.repository";
+import { PostEntity } from "../domain/post.entity.pg";
 
 @Injectable()
 export class PostsService {
@@ -20,8 +22,10 @@ export class PostsService {
     @InjectModel(Post.name) private PostModel: PostModelType,
     private postsRepository: PostsRepository,
     private likesRepository: LikesRepository,
+    private blogsRepository: BlogsRepository,
     private blogsExternalRepository: BlogsExternalQueryRepository,
     private likesService: LikesService,
+    private postEntity: PostEntity,
   ) {}
 
   async getPostById(dto: GetPostByIdDto): Promise<PostViewDto> {
@@ -44,21 +48,18 @@ export class PostsService {
   }
 
   async createPost(dto: CreatePostDto): Promise<string> {
-    const blog = await this.blogsExternalRepository.getByIdOrNotFoundFail(
-      dto.blogId,
-    );
+    await this.blogsRepository.findByIdOrNotFoundFail_pg(dto.blogId);
 
-    const post = this.PostModel.createInstance({
+    const post = this.postEntity.createInstance({
       title: dto.title,
       shortDescription: dto.shortDescription,
       content: dto.content,
       blogId: dto.blogId,
-      blogName: blog.name,
     });
 
-    await this.postsRepository.save(post);
+    await this.postsRepository.createPost_pg(post);
 
-    return post._id.toString();
+    return post.id;
   }
 
   async updatePost({
@@ -67,29 +68,28 @@ export class PostsService {
   }: {
     id: string;
     dto: UpdatePostInputDto;
-  }): Promise<string> {
-    const blog = await this.blogsExternalRepository.getByIdOrNotFoundFail(
-      dto.blogId,
-    );
+  }): Promise<void> {
+    await this.blogsRepository.findByIdOrNotFoundFail_pg(dto.blogId);
 
-    const post = await this.postsRepository.findOrNotFoundFail(id);
+    const post = await this.postsRepository.getByIdOrNotFoundFail_pg(id);
 
-    post.update({
-      ...dto,
-      blogName: blog.name,
+    const updatedPost = this.postEntity.update({
+      post,
+      newValues: dto,
     });
 
-    await this.postsRepository.save(post);
-
-    return post._id.toString();
+    await this.postsRepository.updatePost_pg(updatedPost);
   }
 
-  async deletePost(id: string) {
-    const post = await this.postsRepository.findOrNotFoundFail(id);
+  async deletePost(dto: { postId: string; blogId: string }) {
+    await this.blogsRepository.findByIdOrNotFoundFail_pg(dto.blogId);
 
-    post.makeDeleted();
+    const post = await this.postsRepository.getByIdOrNotFoundFail_pg(
+      dto.postId,
+    );
 
-    await this.postsRepository.save(post);
+    const deletedAt = new Date(Date.now()).toISOString();
+    await this.postsRepository.deletePost_pg({ postId: post.id, deletedAt });
   }
 
   async updatePostLikeStatus(dto: {

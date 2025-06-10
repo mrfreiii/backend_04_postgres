@@ -13,6 +13,7 @@ export const SETTINGS = {
     USERS_REGISTRATION_INFO: 'public."UsersRegistrationInfo"',
     USERS_PASSWORD_RECOVERY_INFO: 'public."UsersPasswordRecoveryInfo"',
     BLOGS: 'public."Blogs"',
+    POSTS: 'public."Posts"',
     SESSIONS: 'public."Sessions"',
     RATE_LIMIT: 'public."RateLimits"',
   },
