@@ -11,11 +11,9 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { ApiBasicAuth, ApiBearerAuth, ApiParam } from "@nestjs/swagger";
+import { ApiBasicAuth, ApiParam } from "@nestjs/swagger";
 
-import { BlogViewDto } from "./view-dto/blogs.view-dto";
 import { CreateBlogInputDto } from "./input-dto/blogs.input-dto";
-import { PostViewDto } from "../../posts/api/view-dto/posts.view-dto";
 import { UpdateBlogInputDto } from "./input-dto/update-blog.input-dto";
 import { PaginatedViewDto } from "../../../../core/dto/base.paginated.view-dto";
 import { GetBlogsQueryParams } from "./input-dto/get-blogs-query-params.input-dto";
@@ -27,15 +25,11 @@ import { BlogsQueryRepository } from "../infrastructure/query/blogs.query-reposi
 import { PostsQueryRepository } from "../../posts/infrastructure/query/posts.query-repository";
 
 import { SETTINGS } from "../../../../settings";
-import { Public } from "../../../user-accounts/guards/decorators/public.decorator";
-import { BasicAuthGuard } from "../../../user-accounts/guards/basic/basic-auth.guard";
-import { JwtOptionalAuthGuard } from "../../../user-accounts/guards/bearer/jwt-optional-auth.guard";
-import { ExtractUserIfExistsFromRequest } from "../../../user-accounts/guards/decorators/param/extract-user-if-exists-from-request.decorator";
-import { UserContextDto } from "../../../user-accounts/guards/dto/user-context.dto";
-import { CreatePostByBlogIdInputDto } from "./input-dto/create-post-by-blog-id.input-dto";
 import { BlogViewDtoPg } from "./view-dto/blogs.view-dto.pg";
 import { PostViewDtoPg } from "../../posts/api/view-dto/posts.view-dto.pg";
 import { UpdatePostByBlogInputDto } from "./input-dto/update-post-by-blog.input-dto";
+import { BasicAuthGuard } from "../../../user-accounts/guards/basic/basic-auth.guard";
+import { CreatePostByBlogIdInputDto } from "./input-dto/create-post-by-blog-id.input-dto";
 
 @Controller(SETTINGS.PATH.BLOGS_ADMIN)
 @UseGuards(BasicAuthGuard)
@@ -145,11 +139,4 @@ export class BlogsAdminController {
       blogId,
     });
   }
-
-  // @Public()
-  // @ApiParam({ name: "id" })
-  // @Get(":id")
-  // async getBlogById(@Param("id") id: string): Promise<BlogViewDto> {
-  //   return this.blogsQueryRepository.getByIdOrNotFoundFail(id);
-  // }
 }

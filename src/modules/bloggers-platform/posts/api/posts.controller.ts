@@ -35,6 +35,7 @@ import { UserContextDto } from "../../../user-accounts/guards/dto/user-context.d
 import { UpdateLikeStatusInputDto } from "../../comments/api/input-dto/update-like-status.input-dto";
 import { JwtOptionalAuthGuard } from "../../../user-accounts/guards/bearer/jwt-optional-auth.guard";
 import { ExtractUserIfExistsFromRequest } from "../../../user-accounts/guards/decorators/param/extract-user-if-exists-from-request.decorator";
+import { PostViewDtoPg } from "./view-dto/posts.view-dto.pg";
 
 @Controller(SETTINGS.PATH.POSTS)
 export class PostsController {
@@ -44,28 +45,43 @@ export class PostsController {
     private postsService: PostsService,
     private commentsService: CommentsService,
   ) {}
-  //
+
   // @ApiBearerAuth()
   // @UseGuards(JwtOptionalAuthGuard)
-  // @Get()
-  // async getAll(
-  //   @Query() query: GetPostsQueryParams,
-  //   @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
-  // ): Promise<PaginatedViewDto<PostViewDto[]>> {
-  //   const allPosts = await this.postsQueryRepository.getAll({
-  //     query,
-  //   });
-  //
-  //   if (user?.id) {
-  //     allPosts.items = await this.postsService.getLikeStatusesForPosts({
-  //       userId: user.id,
-  //       posts: allPosts.items,
-  //     });
-  //   }
-  //
-  //   return allPosts;
-  // }
-  //
+  @Get()
+  async getAll(
+    @Query() query: GetPostsQueryParams,
+    // @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
+  ): Promise<PaginatedViewDto<PostViewDtoPg[]>> {
+    // const allPosts = await this.postsQueryRepository.getAll({
+    //   query,
+    // });
+    // if (user?.id) {
+    //   allPosts.items = await this.postsService.getLikeStatusesForPosts({
+    //     userId: user.id,
+    //     posts: allPosts.items,
+    //   });
+    // }
+
+    return this.postsQueryRepository.getAll_pg({
+      requestParams: query,
+    });
+  }
+
+  // @ApiBearerAuth()
+  // @UseGuards(JwtOptionalAuthGuard)
+  @Get(":postId")
+  async getById(
+    @Param("postId") postId: string,
+    // @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
+  ): Promise<PostViewDtoPg> {
+    return this.postsService.getPostById({
+      postId,
+      // userId: user?.id || null,
+      userId: null,
+    });
+  }
+
   // @UseGuards(BasicAuthGuard)
   // @ApiBasicAuth("basicAuth")
   // @Post()
@@ -74,21 +90,7 @@ export class PostsController {
   //
   //   return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
   // }
-  //
-  // @ApiBearerAuth()
-  // @UseGuards(JwtOptionalAuthGuard)
-  // @ApiParam({ name: "id" })
-  // @Get(":postId")
-  // async getById(
-  //   @Param("postId") postId: string,
-  //   @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
-  // ): Promise<PostViewDto> {
-  //   return this.postsService.getPostById({
-  //     postId,
-  //     userId: user?.id || null,
-  //   });
-  // }
-  //
+
   // @UseGuards(BasicAuthGuard)
   // @ApiBasicAuth("basicAuth")
   // @Put(":id")
@@ -101,7 +103,7 @@ export class PostsController {
   //
   //   return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
   // }
-  //
+
   // @UseGuards(BasicAuthGuard)
   // @ApiBasicAuth("basicAuth")
   // @ApiParam({ name: "id" })
@@ -110,7 +112,7 @@ export class PostsController {
   // async deletePost(@Param("id") id: string): Promise<void> {
   //   return this.postsService.deletePost(id);
   // }
-  //
+
   // @UseGuards(JwtAuthGuard)
   // @ApiBearerAuth()
   // @Post(":id/comments")
@@ -129,7 +131,7 @@ export class PostsController {
   //
   //   return this.commentsQueryRepository.getByIdOrNotFoundFail(commentId);
   // }
-  //
+
   // @ApiBearerAuth()
   // @UseGuards(JwtOptionalAuthGuard)
   // @Get(":id/comments")
@@ -156,7 +158,7 @@ export class PostsController {
   //
   //   return allComments;
   // }
-  //
+
   // @UseGuards(JwtAuthGuard)
   // @ApiBearerAuth()
   // @Put(":postId/like-status")

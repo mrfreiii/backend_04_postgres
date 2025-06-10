@@ -693,26 +693,3 @@ describe("delete post by blog id /blogs/:blogId/posts/:postId", () => {
     expect(resAfter.body.items.length).toBe(0);
   });
 });
-
-// describe("get blog by id /blogs/:id", () => {
-//   connectToTestDBAndClearRepositories();
-//
-//   it("should return 404 for non existent blog", async () => {
-//     const res = await req.get(`${SETTINGS.PATH.BLOGS}/7777`).expect(404);
-//
-//     expect(res.body.errorsMessages[0]).toEqual({
-//       field: "",
-//       message: "Blog not found",
-//     });
-//   });
-//
-//   it("should return blog", async () => {
-//     const createdBlog = (await createTestBlogs())[0];
-//
-//     const res = await req
-//       .get(`${SETTINGS.PATH.BLOGS}/${createdBlog.id}`)
-//       .expect(200);
-//
-//     expect(res.body).toEqual(createdBlog);
-//   });
-// });

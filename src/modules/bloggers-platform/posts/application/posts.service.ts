@@ -15,6 +15,7 @@ import { BlogsExternalQueryRepository } from "../../blogs/infrastructure/externa
 import { GetLikesStatusesForPostsDto } from "./dto/get-all-post.dto";
 import { BlogsRepository } from "../../blogs/infrastructure/blogs.repository";
 import { PostEntity } from "../domain/post.entity.pg";
+import { PostViewDtoPg } from "../api/view-dto/posts.view-dto.pg";
 
 @Injectable()
 export class PostsService {
@@ -28,23 +29,23 @@ export class PostsService {
     private postEntity: PostEntity,
   ) {}
 
-  async getPostById(dto: GetPostByIdDto): Promise<PostViewDto> {
+  async getPostById(dto: GetPostByIdDto): Promise<PostViewDtoPg> {
     const { postId, userId } = dto;
 
-    const post = await this.postsRepository.findOrNotFoundFail(postId);
+    const post = await this.postsRepository.getByIdOrNotFoundFail_pg(postId);
 
-    if (userId) {
-      const userLikeStatus =
-        await this.likesRepository.getLikeByUserIdAndEntityId({
-          userId,
-          entityId: postId,
-        });
+    // if (userId) {
+    //   const userLikeStatus =
+    //     await this.likesRepository.getLikeByUserIdAndEntityId({
+    //       userId,
+    //       entityId: postId,
+    //     });
+    //
+    //   post.extendedLikesInfo.myStatus =
+    //     userLikeStatus?.status ?? LikeStatusEnum.None;
+    // }
 
-      post.extendedLikesInfo.myStatus =
-        userLikeStatus?.status ?? LikeStatusEnum.None;
-    }
-
-    return PostViewDto.mapToView(post);
+    return PostViewDtoPg.mapToView(post);
   }
 
   async createPost(dto: CreatePostDto): Promise<string> {

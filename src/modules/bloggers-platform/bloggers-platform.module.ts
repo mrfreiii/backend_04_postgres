@@ -5,8 +5,9 @@ import { UserAccountsModule } from "../user-accounts/user-accounts.module";
 
 import { BlogEntity } from "./blogs/domain/blog.entity.pg";
 import { Blog, BlogSchema } from "./blogs/domain/blog.entity";
-import { BlogsAdminController } from "./blogs/api/blogsAdminController";
 import { BlogsService } from "./blogs/application/blogs.service";
+import { BlogsAdminController } from "./blogs/api/blogs-admin.controller";
+import { BlogsPublicController } from "./blogs/api/blogs-public.controller";
 import { BlogsRepository } from "./blogs/infrastructure/blogs.repository";
 import { BlogsQueryRepository } from "./blogs/infrastructure/query/blogs.query-repository";
 import { BlogsExternalQueryRepository } from "./blogs/infrastructure/external-query/blogs.external-query-repository";
@@ -54,7 +55,7 @@ const entities = [BlogEntity, PostEntity];
 
 @Module({
   imports: [MongooseModule.forFeature([...schemas]), UserAccountsModule],
-  controllers: [BlogsAdminController, PostsController, CommentsController],
+  controllers: [BlogsAdminController, BlogsPublicController, PostsController, CommentsController],
   providers: [...services, ...repos, ...entities],
   exports: [],
 })
