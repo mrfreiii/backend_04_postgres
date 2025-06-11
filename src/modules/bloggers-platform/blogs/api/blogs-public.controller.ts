@@ -55,9 +55,9 @@ export class BlogsPublicController {
 
   @Get(":id/posts")
   async getPostsByBlogId(
-      @Query() query: GetPostsQueryParams,
-      @Param("id") id: string,
-      // @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
+    @Query() query: GetPostsQueryParams,
+    @Param("id") id: string,
+    // @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
   ): Promise<PaginatedViewDto<PostViewDtoPg[]>> {
     await this.blogsQueryRepository.getByIdOrNotFoundFail_pg(id);
 
