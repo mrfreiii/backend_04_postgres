@@ -52,7 +52,8 @@ export class BlogsPublicController {
   ): Promise<PaginatedViewDto<BlogViewDtoPg[]>> {
     return this.blogsQueryRepository.getAll_pg(query);
   }
-
+  
+  @UseGuards(JwtOptionalAuthGuard)
   @Get(":id/posts")
   async getPostsByBlogId(
     @Query() query: GetPostsQueryParams,
