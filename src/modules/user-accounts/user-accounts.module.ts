@@ -1,7 +1,6 @@
 import { UsersConfig } from "./users/config/users.config";
 
 import { Module } from "@nestjs/common";
-import { MongooseModule } from "@nestjs/mongoose";
 import { JwtModule, JwtService } from "@nestjs/jwt";
 
 import {
@@ -11,9 +10,7 @@ import {
 import { NotificationsModule } from "../notifications/notifications.module";
 
 import { UserEntity } from "./users/domain/user.entity.pg";
-import { User, UserSchema } from "./users/domain/user.entity";
 import { SessionEntity } from "./sessions/domain/session.entity.pg";
-import { Session, SessionSchema } from "./sessions/domain/session.entity";
 import { RegistrationEntity } from "./users/domain/registration.entity.pg";
 import { PasswordRecoveryEntity } from "./users/domain/passwordRecovery.entity.pg";
 
@@ -110,14 +107,7 @@ const entities = [
 ];
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: User.name, schema: UserSchema },
-      { name: Session.name, schema: SessionSchema },
-    ]),
-    NotificationsModule,
-    JwtModule,
-  ],
+  imports: [NotificationsModule, JwtModule],
   controllers: [UsersController, AuthController, SessionsController],
   providers: [
     ...commandHandlers,

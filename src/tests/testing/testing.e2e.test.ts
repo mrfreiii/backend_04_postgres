@@ -1,13 +1,13 @@
 import {
-  connectToTestDBAndClearRepositories,
   req,
   testBasicAuthHeader,
+  connectToTestDBAndClearRepositories,
 } from "../helpers";
 import { SETTINGS } from "../../settings";
 import { createTestUsers } from "../users/helpers";
+import { registerTestUser } from "../auth/helpers";
 import { createTestBlogs } from "../blogs/helpers";
 import { createTestPosts } from "../posts/helpers";
-import { DEFAULT_USER_EMAIL, registerTestUser } from "../auth/helpers";
 
 describe("delete all data", () => {
   connectToTestDBAndClearRepositories();
@@ -21,17 +21,6 @@ describe("delete all data", () => {
       .expect(200);
 
     expect(userRes.body.items).toEqual([user]);
-    // const createdBlog = (await createTestBlogs())[0];
-    // const createdPost = (await createTestPosts({ blogId: createdBlog.id }))[0];
-
-    // const blogsRes = await req.get(SETTINGS.PATH.BLOGS).expect(200);
-    // expect(blogsRes.body.items).toEqual([createdBlog]);
-
-    // const postsRes = await req.get(SETTINGS.PATH.POSTS).expect(200);
-    // expect(postsRes.body.items[0]).toEqual({
-    //   ...createdPost,
-    //   blogName: createdBlog.name,
-    // });
   });
 
   it("should delete all data", async () => {
@@ -42,12 +31,6 @@ describe("delete all data", () => {
       .set("Authorization", testBasicAuthHeader)
       .expect(200);
     expect(userRes.body.items.length).toBe(0);
-
-    // const blogsRes = await req.get(SETTINGS.PATH.BLOGS).expect(200);
-    // expect(blogsRes.body.items.length).toBe(0);
-    //
-    // const postsRes = await req.get(SETTINGS.PATH.POSTS).expect(200);
-    // expect(postsRes.body.items.length).toBe(0);
   });
 });
 

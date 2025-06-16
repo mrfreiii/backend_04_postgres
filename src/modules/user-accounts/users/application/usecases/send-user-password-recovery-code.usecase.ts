@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 
-import { EmailService } from "../../../../notifications/application/email.service";
 import { UsersRepository } from "../../infrastructure/users.repository";
 import { PasswordRecoveryEntity } from "../../domain/passwordRecovery.entity.pg";
+import { EmailService } from "../../../../notifications/application/email.service";
 
 export class SendUserPasswordRecoveryCodeCommand {
   constructor(

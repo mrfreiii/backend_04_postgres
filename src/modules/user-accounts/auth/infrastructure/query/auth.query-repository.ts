@@ -12,10 +12,4 @@ export class AuthQueryRepository {
 
     return MeViewDtoPg.mapToView(user);
   }
-
-  // async me(userId: string): Promise<MeViewDto> {
-  //   const user = await this.usersRepository.findOrNotFoundFail(userId);
-  //
-  //   return MeViewDto.mapToView(user);
-  // }
 }

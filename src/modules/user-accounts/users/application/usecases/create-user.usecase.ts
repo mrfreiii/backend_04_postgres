@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 
 import { CryptoService } from "../crypto.service";
+import { UserEntity } from "../../domain/user.entity.pg";
 import { CreateUserDto } from "../../dto/create-user.dto";
 import { UsersRepository } from "../../infrastructure/users.repository";
 import { DomainException } from "../../../../../core/exceptions/domain-exceptions";
 import { DomainExceptionCode } from "../../../../../core/exceptions/domain-exception-codes";
-import { UserEntity } from "../../domain/user.entity.pg";
 
 export class CreateUserCommand {
   constructor(public dto: CreateUserDto) {}

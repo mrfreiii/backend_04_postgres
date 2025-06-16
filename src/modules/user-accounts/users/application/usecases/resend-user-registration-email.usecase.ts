@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 
-import { EmailService } from "../../../../notifications/application/email.service";
 import { UsersRepository } from "../../infrastructure/users.repository";
+import { RegistrationEntity } from "../../domain/registration.entity.pg";
+import { EmailService } from "../../../../notifications/application/email.service";
 import { DomainException } from "../../../../../core/exceptions/domain-exceptions";
 import { DomainExceptionCode } from "../../../../../core/exceptions/domain-exception-codes";
-import { RegistrationEntity } from "../../domain/registration.entity.pg";
 
 export class ResendUserRegistrationEmailCommand {
   constructor(

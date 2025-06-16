@@ -1,7 +1,7 @@
-import { NewestLikes } from "../newestLikes.schema";
+import { NewestLikesPg } from "../../../types/likes.types";
 
 export class UpdateLikesDto {
   likesCount: number;
   dislikesCount: number;
-  newestLikes: NewestLikes[];
+  newestLikes: NewestLikesPg[];
 }

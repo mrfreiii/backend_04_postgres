@@ -2,21 +2,21 @@ import { req } from "../helpers";
 import { SETTINGS } from "../../settings";
 import { createTestPostsByBlog } from "../blogs/helpers";
 import { createTestUsers, getUsersJwtTokens } from "../users/helpers";
-import { CommentViewDto } from "../../modules/bloggers-platform/comments/api/view-dto/comments.view-dto";
+import { UserViewDtoPg } from "../../modules/user-accounts/users/api/view-dto/users.view-dto.pg";
 import { CreateCommentByPostIdInputDto } from "../../modules/bloggers-platform/posts/api/input-dto/posts.input-dto";
-import { UserViewDto } from "../../modules/user-accounts/users/api/view-dto/users.view-dto";
+import { CommentViewDtoPg } from "../../modules/bloggers-platform/comments/api/view-dto/comments.view-dto.pg";
 
 export type TestCommentDataType = {
-  comments: CommentViewDto[];
+  comments: CommentViewDtoPg[];
   createdPostId: string;
-  createdUser: UserViewDto;
+  createdUser: UserViewDtoPg;
   userToken: string;
 };
 
 export const createTestComments = async (
   count: number = 1,
 ): Promise<TestCommentDataType> => {
-  const commentsList: CommentViewDto[] = [];
+  const commentsList: CommentViewDtoPg[] = [];
 
   const createdPost = (await createTestPostsByBlog())[0];
 

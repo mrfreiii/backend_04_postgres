@@ -15,8 +15,8 @@ import { RefreshTokenPayloadDto } from "../../auth/dto/tokensPayload.dto";
 import { CookieJwtAuthGuard } from "../../guards/bearer/cookie-jwt-auth.guard";
 import { SessionsQueryRepository } from "../infrastructure/query/sessions.query-repository";
 import { DeleteSessionByIdCommand } from "../application/usecases/delete-session-by-id.usecase";
-import { ExtractRefreshTokenPayload } from "../../guards/decorators/param/extract-refresh-token-payload.decorator";
 import { DeleteAllOtherSessionCommand } from "../application/usecases/delete-all-other-sessions.usecase";
+import { ExtractRefreshTokenPayload } from "../../guards/decorators/param/extract-refresh-token-payload.decorator";
 
 @Controller(SETTINGS.PATH.SESSIONS)
 export class SessionsController {

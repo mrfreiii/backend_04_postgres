@@ -16,7 +16,7 @@ import {
 import { SETTINGS } from "../../settings";
 import { deleteRateLimitsData } from "../testing/helpers";
 import { createTestUsers, getUsersJwtTokens } from "../users/helpers";
-import { UserViewDto } from "../../modules/user-accounts/users/api/view-dto/users.view-dto";
+import { UserViewDtoPg } from "../../modules/user-accounts/users/api/view-dto/users.view-dto.pg";
 import { RegisterUserInputDto } from "../../modules/user-accounts/auth/api/input-dto/register-user.input-dto";
 
 describe("register user /registration", () => {
@@ -672,7 +672,7 @@ describe("login user /login", () => {
   connectToTestDBAndClearRepositories();
 
   const userPassword = "1234567890";
-  let createdUser: UserViewDto;
+  let createdUser: UserViewDtoPg;
 
   beforeAll(async () => {
     createdUser = (await createTestUsers({ password: userPassword }))[0];
@@ -839,7 +839,7 @@ describe("login user /login", () => {
 describe("check user /me", () => {
   connectToTestDBAndClearRepositories();
 
-  let createdUser: UserViewDto;
+  let createdUser: UserViewDtoPg;
   let userToken: string;
 
   beforeAll(async () => {
@@ -895,7 +895,7 @@ describe("refresh token /refresh-token", () => {
   connectToTestDBAndClearRepositories();
 
   const userPassword = "1234567890";
-  let createdUser: UserViewDto;
+  let createdUser: UserViewDtoPg;
 
   let authData: { loginOrEmail: string; password: string };
   let cookieWithRefreshToken: string;
@@ -972,7 +972,7 @@ describe("logout /logout", () => {
   connectToTestDBAndClearRepositories();
 
   const userPassword = "1234567890";
-  let createdUser: UserViewDto;
+  let createdUser: UserViewDtoPg;
 
   let authData: { loginOrEmail: string; password: string };
   let cookieWithValidRefreshToken: string;

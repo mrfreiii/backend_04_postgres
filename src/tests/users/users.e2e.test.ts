@@ -1,12 +1,13 @@
-import { SETTINGS } from "../../settings";
-import { createTestUsers } from "./helpers";
 import {
-  connectToTestDBAndClearRepositories,
   req,
   testBasicAuthHeader,
+  connectToTestDBAndClearRepositories,
 } from "../helpers";
+import { SETTINGS } from "../../settings";
+import { createTestUsers } from "./helpers";
+
 import { convertObjectToQueryString } from "../../utils/convertObjectToQueryString";
-import { UserViewDto } from "../../modules/user-accounts/users/api/view-dto/users.view-dto";
+import { UserViewDtoPg } from "../../modules/user-accounts/users/api/view-dto/users.view-dto.pg";
 import { CreateUserInputDto } from "../../modules/user-accounts/users/api/input-dto/users.input-dto";
 import { GetUsersQueryParams } from "../../modules/user-accounts/users/api/input-dto/get-users-query-params.input-dto";
 
@@ -108,7 +109,7 @@ describe("create user /users", () => {
 describe("get all /users", () => {
   connectToTestDBAndClearRepositories();
 
-  let createdUsers: UserViewDto[] = [];
+  let createdUsers: UserViewDtoPg[] = [];
 
   it("should return 401 for request without basic auth header", async () => {
     await req.get(SETTINGS.PATH.USERS_ADMIN).expect(401);
@@ -168,7 +169,7 @@ describe("get all /users", () => {
 describe("delete user by id /users", () => {
   connectToTestDBAndClearRepositories();
 
-  let userForDeletion: UserViewDto;
+  let userForDeletion: UserViewDtoPg;
 
   it("should get not empty array", async () => {
     userForDeletion = (await createTestUsers({}))[0];

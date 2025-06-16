@@ -1,12 +1,10 @@
-import { add } from "date-fns";
-import { v4 as uuidv4 } from "uuid";
 import { CommandBus, CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 
 import { CreateUserCommand } from "./create-user.usecase";
 import { UsersRepository } from "../../infrastructure/users.repository";
+import { RegistrationEntity } from "../../domain/registration.entity.pg";
 import { EmailService } from "../../../../notifications/application/email.service";
 import { RegisterUserInputDto } from "../../../auth/api/input-dto/register-user.input-dto";
-import { RegistrationEntity } from "../../domain/registration.entity.pg";
 
 export class RegisterUserCommand {
   constructor(

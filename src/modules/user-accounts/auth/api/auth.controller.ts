@@ -19,7 +19,7 @@ import { CookieJwtAuthGuard } from "../../guards/bearer/cookie-jwt-auth.guard";
 
 import { RefreshTokenPayloadDto } from "../dto/tokensPayload.dto";
 import { UserContextDto } from "../../guards/dto/user-context.dto";
-import { MeViewDto } from "../../users/api/view-dto/users.view-dto";
+import { MeViewDtoPg } from "../../users/api/view-dto/users.view-dto.pg";
 import { RegisterUserInputDto } from "./input-dto/register-user.input-dto";
 import { UpdatePasswordInputDto } from "./input-dto/update-password.input-dto";
 import { ConfirmUserRegistrationInputDto } from "./input-dto/confirm-user-registration.input-dto";
@@ -134,7 +134,7 @@ export class AuthController {
   @ApiBearerAuth()
   @Get("me")
   @UseGuards(JwtAuthGuard)
-  me(@ExtractUserFromRequest() user: UserContextDto): Promise<MeViewDto> {
+  me(@ExtractUserFromRequest() user: UserContextDto): Promise<MeViewDtoPg> {
     return this.authQueryRepository.me_pg(user.id);
   }
 

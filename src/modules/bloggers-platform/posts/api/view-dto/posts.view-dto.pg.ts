@@ -1,18 +1,13 @@
+import { LikeStatusEnum } from "../../../enums/likes.enum";
 import { PostEntityType } from "../../domain/post.entity.pg";
-import { LikeStatusEnum } from "../../../likes/enums/likes.enum";
+import { NewestLikesPg } from "../../../types/likes.types";
 
 class PostViewDtoPgInputType {
   post: PostEntityType;
   likesCount?: number;
   dislikesCount?: number;
   myStatus?: LikeStatusEnum;
-  newestLikes?: NewestLikesDto[];
-}
-
-class NewestLikesDto {
-  addedAt: Date;
-  userId: string;
-  login: string;
+  newestLikes?: NewestLikesPg[];
 }
 
 export class PostViewDtoPg {
@@ -27,7 +22,7 @@ export class PostViewDtoPg {
     likesCount: number;
     dislikesCount: number;
     myStatus: string;
-    newestLikes: NewestLikesDto[] | [];
+    newestLikes: NewestLikesPg[] | [];
   };
 
   static mapToView(dto: PostViewDtoPgInputType): PostViewDtoPg {

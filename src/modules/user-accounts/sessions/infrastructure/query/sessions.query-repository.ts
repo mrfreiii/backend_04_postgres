@@ -2,13 +2,11 @@ import { DataSource } from "typeorm";
 import { Injectable } from "@nestjs/common";
 import { InjectDataSource } from "@nestjs/typeorm";
 
-import {
-  DomainExceptionCode
-} from "../../../../../core/exceptions/domain-exception-codes";
 import { SETTINGS } from "../../../../../settings";
 import { SessionEntityType } from "../../domain/session.entity.pg";
 import { SessionViewDto } from "../../api/view-dto/sessions.view-dto";
 import { DomainException } from "../../../../../core/exceptions/domain-exceptions";
+import { DomainExceptionCode } from "../../../../../core/exceptions/domain-exception-codes";
 
 @Injectable()
 export class SessionsQueryRepository {
@@ -22,10 +20,12 @@ export class SessionsQueryRepository {
     `;
 
     try {
-      const sessions: SessionEntityType[] = await this.dataSource.query(query, [ userId ]);
+      const sessions: SessionEntityType[] = await this.dataSource.query(query, [
+        userId,
+      ]);
 
       const onlyActiveSessions = sessions.filter(
-          (session) => new Date(session.expirationTime) > new Date(),
+        (session) => new Date(session.expirationTime) > new Date(),
       );
 
       return onlyActiveSessions.map(SessionViewDto.mapToView);

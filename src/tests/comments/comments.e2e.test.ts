@@ -2,15 +2,15 @@ import { SETTINGS } from "../../settings";
 import { createTestComments, TestCommentDataType } from "./helpers";
 import { connectToTestDBAndClearRepositories, req } from "../helpers";
 import { createTestUsers, getUsersJwtTokens } from "../users/helpers";
-import { LikeStatusEnum } from "../../modules/bloggers-platform/likes/enums/likes.enum";
-import { CommentViewDto } from "../../modules/bloggers-platform/comments/api/view-dto/comments.view-dto";
+import { LikeStatusEnum } from "../../modules/bloggers-platform/enums/likes.enum";
 import { CreateCommentByPostIdInputDto } from "../../modules/bloggers-platform/posts/api/input-dto/posts.input-dto";
 import { UpdateLikeStatusInputDto } from "../../modules/bloggers-platform/comments/api/input-dto/update-like-status.input-dto";
+import { CommentViewDtoPg } from "../../modules/bloggers-platform/comments/api/view-dto/comments.view-dto.pg";
 
 describe("get comment by id /comments/:id", () => {
   connectToTestDBAndClearRepositories();
 
-  let createdComment: CommentViewDto;
+  let createdComment: CommentViewDtoPg;
   let userToken: string;
 
   beforeAll(async () => {
@@ -207,7 +207,7 @@ describe("delete comment by id /comments/:id", () => {
 describe("update comment likes /comments/:id/like-status", () => {
   connectToTestDBAndClearRepositories();
 
-  let comment: CommentViewDto;
+  let comment: CommentViewDtoPg;
   let user1Token: string;
 
   beforeAll(async () => {

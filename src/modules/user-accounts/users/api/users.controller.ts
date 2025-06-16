@@ -14,7 +14,6 @@ import { CommandBus } from "@nestjs/cqrs";
 import { ApiBasicAuth, ApiParam } from "@nestjs/swagger";
 
 import { SETTINGS } from "../../../../settings";
-import { UserViewDto } from "./view-dto/users.view-dto";
 import { UserViewDtoPg } from "./view-dto/users.view-dto.pg";
 import { CreateUserInputDto } from "./input-dto/users.input-dto";
 import { BasicAuthGuard } from "../../guards/basic/basic-auth.guard";
@@ -36,7 +35,7 @@ export class UsersController {
   @Get()
   async getAll(
     @Query() query: GetUsersQueryParams,
-  ): Promise<PaginatedViewDto<UserViewDto[]>> {
+  ): Promise<PaginatedViewDto<UserViewDtoPg[]>> {
     return this.usersQueryRepository.getAll_pg(query);
   }
 

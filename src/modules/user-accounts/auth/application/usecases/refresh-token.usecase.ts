@@ -10,7 +10,7 @@ import { SessionsRepository } from "../../../sessions/infrastructure/sessions.re
 import { DomainExceptionCode } from "../../../../../core/exceptions/domain-exception-codes";
 import {
   SessionEntity,
-  SessionEntityType
+  SessionEntityType,
 } from "../../../sessions/domain/session.entity.pg";
 
 export class RefreshTokenCommand {
@@ -64,8 +64,8 @@ export class RefreshTokenCommandHandler
         ip,
         userAgent,
         refreshToken,
-      }
-    })
+      },
+    });
 
     await this.sessionsRepository.updateSession_pg(updatedSession);
 

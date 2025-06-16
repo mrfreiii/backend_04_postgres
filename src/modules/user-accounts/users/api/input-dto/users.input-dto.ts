@@ -1,10 +1,10 @@
 //dto для боди при создании юзера. Сюда могут быть добавлены декораторы swagger
-import { IsEmail, IsString, Length, Matches } from "class-validator";
-import { Trim } from "../../../../../core/decorators/transform/trim";
 import {
   loginConstraints,
   passwordConstraints,
-} from "../../domain/user.entity";
+} from "../../domain/user.entity.pg";
+import { IsEmail, IsString, Length, Matches } from "class-validator";
+import { Trim } from "../../../../../core/decorators/transform/trim";
 import { IsStringWithTrim } from "../../../../../core/decorators/validation/is-string-with-trim";
 
 export class CreateUserInputDto {

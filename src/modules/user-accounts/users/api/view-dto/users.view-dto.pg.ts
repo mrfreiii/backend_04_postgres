@@ -5,8 +5,6 @@ export class UserViewDtoPg {
   login: string;
   email: string;
   createdAt: string;
-  // firstName: string;
-  // lastName: string | null;
 
   static mapToView(user: UserEntity): UserViewDtoPg {
     const dto = new UserViewDtoPg();
@@ -15,8 +13,6 @@ export class UserViewDtoPg {
     dto.login = user.login;
     dto.email = user.email;
     dto.createdAt = user.createdAt;
-    // dto.firstName = user.name.firstName;
-    // dto.lastName = user.name.lastName;
 
     return dto;
   }

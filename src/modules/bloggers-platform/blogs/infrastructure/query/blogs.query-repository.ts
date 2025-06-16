@@ -1,29 +1,19 @@
-import { InjectModel } from "@nestjs/mongoose";
-import mongoose, { FilterQuery } from "mongoose";
-import { Injectable } from "@nestjs/common";
-
-import { Blog, BlogModelType } from "../../domain/blog.entity";
-import { BlogViewDto } from "../../api/view-dto/blogs.view-dto";
-import { PaginatedViewDto } from "../../../../../core/dto/base.paginated.view-dto";
-import { GetBlogsQueryParams } from "../../api/input-dto/get-blogs-query-params.input-dto";
-import { DomainException } from "../../../../../core/exceptions/domain-exceptions";
-import { DomainExceptionCode } from "../../../../../core/exceptions/domain-exception-codes";
-import { BlogEntityType } from "../../domain/blog.entity.pg";
-import { validate as isValidUUID } from "uuid";
-import { SETTINGS } from "../../../../../settings";
-import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
+import { Injectable } from "@nestjs/common";
+import { validate as isValidUUID } from "uuid";
+import { InjectDataSource } from "@nestjs/typeorm";
+
+import { SETTINGS } from "../../../../../settings";
+import { BlogEntityType } from "../../domain/blog.entity.pg";
 import { BlogViewDtoPg } from "../../api/view-dto/blogs.view-dto.pg";
-import { GetUsersQueryParams } from "../../../../user-accounts/users/api/input-dto/get-users-query-params.input-dto";
-import { UserViewDto } from "../../../../user-accounts/users/api/view-dto/users.view-dto";
-import { UserViewDtoPg } from "../../../../user-accounts/users/api/view-dto/users.view-dto.pg";
+import { PaginatedViewDto } from "../../../../../core/dto/base.paginated.view-dto";
+import { DomainException } from "../../../../../core/exceptions/domain-exceptions";
+import { GetBlogsQueryParams } from "../../api/input-dto/get-blogs-query-params.input-dto";
+import { DomainExceptionCode } from "../../../../../core/exceptions/domain-exception-codes";
 
 @Injectable()
 export class BlogsQueryRepository {
-  constructor(
-    @InjectModel(Blog.name) private BlogModel: BlogModelType,
-    @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getByIdOrNotFoundFail_pg(blogId: string): Promise<BlogViewDtoPg> {
     if (!isValidUUID(blogId)) {

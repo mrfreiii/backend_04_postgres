@@ -15,11 +15,7 @@ import { DomainExceptionCode } from "../../core/exceptions/domain-exception-code
 
 @Controller(SETTINGS.PATH.TESTING)
 export class TestingController {
-  constructor(
-    // @InjectConnection() private readonly databaseConnection: Connection,
-    // @InjectModel(RateLimit.name) private RateLimitModel: RateLimitModelType,
-    @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   @Delete("all-data")
   @HttpCode(HttpStatus.NO_CONTENT)

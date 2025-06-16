@@ -1,24 +1,16 @@
-import mongoose from "mongoose";
 import { DataSource } from "typeorm";
 import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
+import { validate as isValidUUID } from "uuid";
 import { InjectDataSource } from "@nestjs/typeorm";
 
 import { SETTINGS } from "../../../../settings";
 import { BlogEntityType } from "../domain/blog.entity.pg";
-import { Blog, BlogDocument, BlogModelType } from "../domain/blog.entity";
 import { DomainException } from "../../../../core/exceptions/domain-exceptions";
 import { DomainExceptionCode } from "../../../../core/exceptions/domain-exception-codes";
-import { UserEntity } from "../../../user-accounts/users/domain/user.entity.pg";
-import { validate as isValidUUID } from "uuid";
-import { BlogViewDtoPg } from "../api/view-dto/blogs.view-dto.pg";
 
 @Injectable()
 export class BlogsRepository {
-  constructor(
-    @InjectModel(Blog.name) private BlogModel: BlogModelType,
-    @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createBlog_pg(blog: BlogEntityType): Promise<void> {
     const query = `
@@ -147,10 +139,7 @@ export class BlogsRepository {
     `;
 
     try {
-      await this.dataSource.query(query, [
-        dto.deletedAt,
-        dto.blogId,
-      ]);
+      await this.dataSource.query(query, [dto.deletedAt, dto.blogId]);
     } catch (e) {
       console.log(e);
       throw new DomainException({
@@ -164,49 +153,5 @@ export class BlogsRepository {
         ],
       });
     }
-  }
-
-  async save(blog: BlogDocument) {
-    await blog.save();
-  }
-
-  async findById(id: string): Promise<BlogDocument | null> {
-    const isObjectId = mongoose.Types.ObjectId.isValid(id);
-    if (!isObjectId) {
-      throw new DomainException({
-        code: DomainExceptionCode.NotFound,
-        message: "Blog not found",
-        extensions: [
-          {
-            field: "",
-            message: "Blog not found",
-          },
-        ],
-      });
-    }
-
-    return this.BlogModel.findOne({
-      _id: id,
-      deletedAt: null,
-    });
-  }
-
-  async findOrNotFoundFail(id: string): Promise<BlogDocument> {
-    const blog = await this.findById(id);
-
-    if (!blog) {
-      throw new DomainException({
-        code: DomainExceptionCode.NotFound,
-        message: "Blog not found",
-        extensions: [
-          {
-            field: "",
-            message: "Blog not found",
-          },
-        ],
-      });
-    }
-
-    return blog;
   }
 }

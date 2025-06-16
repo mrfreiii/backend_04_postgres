@@ -40,34 +40,30 @@ export class CoreConfig {
   mongoDbName: string;
 
   @IsNotEmpty({
-    message:
-        "Set Env variable POSTGRES_URL, example: localhost",
+    message: "Set Env variable POSTGRES_URL, example: localhost",
   })
   postgresURL: string;
 
   @IsNumber(
-      {},
-      {
-        message: "Set Env variable POSTGRES_PORT, example: 5432",
-      },
+    {},
+    {
+      message: "Set Env variable POSTGRES_PORT, example: 5432",
+    },
   )
   postgresPort: number;
 
   @IsNotEmpty({
-    message:
-        "Set Env variable POSTGRES_USERNAME, example: username",
+    message: "Set Env variable POSTGRES_USERNAME, example: username",
   })
   postgresUsername: string;
 
   @IsNotEmpty({
-    message:
-        "Set Env variable POSTGRES_PASSWORD, example: password",
+    message: "Set Env variable POSTGRES_PASSWORD, example: password",
   })
   postgresPassword: string;
 
   @IsNotEmpty({
-    message:
-        "Set Env variable POSTGRES_DB_NAME, example: dbname",
+    message: "Set Env variable POSTGRES_DB_NAME, example: dbname",
   })
   postgresDbName: string;
 
@@ -79,7 +75,7 @@ export class CoreConfig {
 
   @IsBoolean({
     message:
-        "Set Env variable RATE_LIMIT_ENABLED to enable/disable, dangerous for production! Example: true, available values: true, false, 0, 1",
+      "Set Env variable RATE_LIMIT_ENABLED to enable/disable, dangerous for production! Example: true, available values: true, false, 0, 1",
   })
   rateLimitEnabled: boolean;
 
@@ -113,17 +109,16 @@ export class CoreConfig {
     // Postgres settings
     this.postgresURL = this.configService.get("POSTGRES_URL");
     this.postgresPort = configValidationUtility.convertToNumber(
-        this.configService.get("POSTGRES_PORT"),
+      this.configService.get("POSTGRES_PORT"),
     ) as number;
     this.postgresUsername = this.configService.get("POSTGRES_USERNAME");
     this.postgresPassword = this.configService.get("POSTGRES_PASSWORD");
     this.postgresDbName = this.configService.get("POSTGRES_DB_NAME");
 
     // Rate limit settings
-    this.rateLimitEnabled =
-        configValidationUtility.convertToBoolean(
-            this.configService.get("RATE_LIMIT_ENABLED"),
-        ) as boolean;
+    this.rateLimitEnabled = configValidationUtility.convertToBoolean(
+      this.configService.get("RATE_LIMIT_ENABLED"),
+    ) as boolean;
     this.rateLimitPeriodInSec = configValidationUtility.convertToNumber(
       this.configService.get("RATE_LIMIT_PERIOD_IN_SEC"),
     ) as number;
@@ -133,9 +128,9 @@ export class CoreConfig {
 
     // Other settings
     this.sendInternalServerErrorDetails =
-        configValidationUtility.convertToBoolean(
-            this.configService.get("SEND_INTERNAL_SERVER_ERROR_DETAILS"),
-        ) as boolean;
+      configValidationUtility.convertToBoolean(
+        this.configService.get("SEND_INTERNAL_SERVER_ERROR_DETAILS"),
+      ) as boolean;
 
     configValidationUtility.validateConfig(this);
   }

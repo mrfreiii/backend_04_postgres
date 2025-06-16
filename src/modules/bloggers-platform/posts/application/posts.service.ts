@@ -1,34 +1,23 @@
 import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
 
-import { CreatePostDto } from "../dto/post.dto";
-import { GetPostByIdDto } from "./dto/get-post-by-id.dto";
-import { Post, PostModelType } from "../domain/post.entity";
-import { PostViewDto } from "../api/view-dto/posts.view-dto";
 import {
   LikeStatusEnum,
   mapEnumLikeStatusToBdStatus,
-} from "../../likes/enums/likes.enum";
-import { LikesService } from "../../likes/application/likes.service";
+} from "../../enums/likes.enum";
+import { CreatePostDto } from "../dto/post.dto";
+import { PostEntity } from "../domain/post.entity.pg";
+import { NewestLikesPg } from "../../types/likes.types";
+import { GetPostByIdDto } from "./dto/get-post-by-id.dto";
+import { PostViewDtoPg } from "../api/view-dto/posts.view-dto.pg";
 import { PostsRepository } from "../infrastructure/posts.repository";
 import { UpdatePostInputDto } from "../api/input-dto/update-post.input-dto";
-import { LikesRepository } from "../../likes/infrastructure/likes.repository";
-import { BlogsExternalQueryRepository } from "../../blogs/infrastructure/external-query/blogs.external-query-repository";
-import { GetLikesStatusesForPostsDto } from "./dto/get-all-post.dto";
 import { BlogsRepository } from "../../blogs/infrastructure/blogs.repository";
-import { PostEntity } from "../domain/post.entity.pg";
-import { PostViewDtoPg } from "../api/view-dto/posts.view-dto.pg";
-import { NewestLikes } from "../domain/newestLikes.schema";
 
 @Injectable()
 export class PostsService {
   constructor(
-    @InjectModel(Post.name) private PostModel: PostModelType,
     private postsRepository: PostsRepository,
-    private likesRepository: LikesRepository,
     private blogsRepository: BlogsRepository,
-    private blogsExternalRepository: BlogsExternalQueryRepository,
-    private likesService: LikesService,
     private postEntity: PostEntity,
   ) {}
 
@@ -82,50 +71,7 @@ export class PostsService {
     return updatedPosts;
   }
 
-  async _getLikesCount_pg(postId: string): Promise<number> {
-    const response = await this.postsRepository.getPostLikesStatusCount_pg({
-      postId,
-      likeStatus: LikeStatusEnum.Like,
-    });
-
-    return response ?? 0;
-  }
-
-  async _getDislikesCount_pg(postId: string): Promise<number> {
-    const response = await this.postsRepository.getPostLikesStatusCount_pg({
-      postId,
-      likeStatus: LikeStatusEnum.Dislike,
-    });
-
-    return response ?? 0;
-  }
-
-  async _getLastThreeLikes_pg(postId: string): Promise<NewestLikes[]> {
-    const response =
-      await this.postsRepository.getPostLastThreeLikes_pg(postId);
-
-    return response ?? [];
-  }
-
-  async _getUserLikeStatus_pg(dto: {
-    postId: string;
-    userId: string | null;
-  }): Promise<LikeStatusEnum> {
-    const { userId, postId } = dto;
-
-    let userLikeStatus = LikeStatusEnum.None;
-
-    if (userId) {
-      userLikeStatus = await this.postsRepository.getUserPostLikeStatus_pg({
-        postId,
-        userId,
-      });
-    }
-
-    return userLikeStatus ?? LikeStatusEnum.None;
-  }
-
-  async createPost(dto: CreatePostDto): Promise<string> {
+  async createPost_pg(dto: CreatePostDto): Promise<string> {
     await this.blogsRepository.findByIdOrNotFoundFail_pg(dto.blogId);
 
     const post = this.postEntity.createInstance({
@@ -140,7 +86,7 @@ export class PostsService {
     return post.id;
   }
 
-  async updatePost({
+  async updatePost_pg({
     id,
     dto,
   }: {
@@ -159,7 +105,7 @@ export class PostsService {
     await this.postsRepository.updatePost_pg(updatedPost);
   }
 
-  async deletePost(dto: { postId: string; blogId: string }) {
+  async deletePost_pg(dto: { postId: string; blogId: string }) {
     await this.blogsRepository.findByIdOrNotFoundFail_pg(dto.blogId);
 
     const post = await this.postsRepository.getByIdOrNotFoundFail_pg(
@@ -170,7 +116,7 @@ export class PostsService {
     await this.postsRepository.deletePost_pg({ postId: post.id, deletedAt });
   }
 
-  async updatePostLikeStatus(dto: {
+  async updatePostLikeStatus_pg(dto: {
     userId: string;
     postId: string;
     newLikeStatus: LikeStatusEnum;
@@ -213,67 +159,48 @@ export class PostsService {
           break;
       }
     }
-
-    // const newLikesAndDislikesCounts = await this.likesService.updateLike({
-    //   userId,
-    //   newLikeStatus,
-    //   entityId: postId,
-    //   currentLikesCount: post.extendedLikesInfo?.likesCount || 0,
-    //   currentDislikesCount: post.extendedLikesInfo?.dislikesCount || 0,
-    // });
-    //
-    // let newestLikes: NewestLikes[] = post.extendedLikesInfo.newestLikes;
-    // let needToRecalculateNewestLikes = false;
-    //
-    // switch (newLikeStatus) {
-    //   case LikeStatusEnum.Like:
-    //     needToRecalculateNewestLikes = true;
-    //     break;
-    //   case LikeStatusEnum.Dislike:
-    //   case LikeStatusEnum.None:
-    //     if (newestLikes.some((newestLike) => newestLike.userId === userId)) {
-    //       needToRecalculateNewestLikes = true;
-    //     }
-    //     break;
-    // }
-    //
-    // if (needToRecalculateNewestLikes) {
-    //   newestLikes =
-    //     await this.likesRepository.getLastThreeLikesForEntity(postId);
-    // }
-    //
-    // post.updateLikes({
-    //   likesCount: newLikesAndDislikesCounts.newLikesCount,
-    //   dislikesCount: newLikesAndDislikesCounts.newDislikesCount,
-    //   newestLikes,
-    // });
-    //
-    // await this.postsRepository.save(post);
   }
 
-  async getLikeStatusesForPosts(
-    dto: GetLikesStatusesForPostsDto,
-  ): Promise<PostViewDto[]> {
-    const { posts, userId } = dto;
-
-    const userLikeStatuses = await this.likesRepository.getLikesForEntities({
-      userId: userId!,
-      entitiesIds: posts.map((post) => post.id),
+  async _getLikesCount_pg(postId: string): Promise<number> {
+    const response = await this.postsRepository.getPostLikesStatusCount_pg({
+      postId,
+      likeStatus: LikeStatusEnum.Like,
     });
 
-    return posts.map((post) => {
-      const userLikeStatus =
-        userLikeStatuses.find(
-          (status) => status.userId === userId && status.entityId === post.id,
-        )?.status || LikeStatusEnum.None;
+    return response ?? 0;
+  }
 
-      return {
-        ...post,
-        extendedLikesInfo: {
-          ...post.extendedLikesInfo,
-          myStatus: userLikeStatus,
-        },
-      };
+  async _getDislikesCount_pg(postId: string): Promise<number> {
+    const response = await this.postsRepository.getPostLikesStatusCount_pg({
+      postId,
+      likeStatus: LikeStatusEnum.Dislike,
     });
+
+    return response ?? 0;
+  }
+
+  async _getLastThreeLikes_pg(postId: string): Promise<NewestLikesPg[]> {
+    const response =
+      await this.postsRepository.getPostLastThreeLikes_pg(postId);
+
+    return response ?? [];
+  }
+
+  async _getUserLikeStatus_pg(dto: {
+    postId: string;
+    userId: string | null;
+  }): Promise<LikeStatusEnum> {
+    const { userId, postId } = dto;
+
+    let userLikeStatus = LikeStatusEnum.None;
+
+    if (userId) {
+      userLikeStatus = await this.postsRepository.getUserPostLikeStatus_pg({
+        postId,
+        userId,
+      });
+    }
+
+    return userLikeStatus ?? LikeStatusEnum.None;
   }
 }

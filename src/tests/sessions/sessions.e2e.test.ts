@@ -1,19 +1,19 @@
 import {
-  connectToTestDBAndClearRepositories,
-  delayInSec,
   req,
+  delayInSec,
+  connectToTestDBAndClearRepositories,
 } from "../helpers";
 import { SETTINGS } from "../../settings";
 import { createTestUsers } from "../users/helpers";
-import { getDeviceIdFromRefreshTokenCookie } from "./helpers";
-import { UserViewDto } from "../../modules/user-accounts/users/api/view-dto/users.view-dto";
 import { deleteRateLimitsData } from "../testing/helpers";
+import { getDeviceIdFromRefreshTokenCookie } from "./helpers";
+import { UserViewDtoPg } from "../../modules/user-accounts/users/api/view-dto/users.view-dto.pg";
 
 describe("sessions /devices", () => {
   connectToTestDBAndClearRepositories();
 
   const userPassword = "1234567890";
-  let createdUser: UserViewDto;
+  let createdUser: UserViewDtoPg;
   let authData: { loginOrEmail: string; password: string };
 
   let cookieWithRefreshTokenDevice1: string;

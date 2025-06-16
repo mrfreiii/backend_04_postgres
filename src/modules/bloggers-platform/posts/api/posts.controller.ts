@@ -132,41 +132,10 @@ export class PostsController {
     @Body() body: UpdateLikeStatusInputDto,
     @ExtractUserFromRequest() user: UserContextDto,
   ): Promise<void> {
-    return this.postsService.updatePostLikeStatus({
+    return this.postsService.updatePostLikeStatus_pg({
       userId: user.id,
       postId,
       newLikeStatus: body.likeStatus,
     });
   }
-
-  // @UseGuards(BasicAuthGuard)
-  // @ApiBasicAuth("basicAuth")
-  // @Post()
-  // async createPost(@Body() body: CreatePostInputDto): Promise<PostViewDto> {
-  //   const postId = await this.postsService.createPost(body);
-  //
-  //   return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
-  // }
-
-  // @UseGuards(BasicAuthGuard)
-  // @ApiBasicAuth("basicAuth")
-  // @Put(":id")
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // async updatePost(
-  //   @Param("id") id: string,
-  //   @Body() body: UpdatePostInputDto,
-  // ): Promise<PostViewDto> {
-  //   const postId = await this.postsService.updatePost({ id, dto: body });
-  //
-  //   return this.postsQueryRepository.getByIdOrNotFoundFail(postId);
-  // }
-
-  // @UseGuards(BasicAuthGuard)
-  // @ApiBasicAuth("basicAuth")
-  // @ApiParam({ name: "id" })
-  // @Delete(":id")
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // async deletePost(@Param("id") id: string): Promise<void> {
-  //   return this.postsService.deletePost(id);
-  // }
 }

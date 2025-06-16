@@ -1,6 +1,6 @@
 import { SETTINGS } from "../../settings";
 import { req, testBasicAuthHeader } from "../helpers";
-import { UserViewDto } from "../../modules/user-accounts/users/api/view-dto/users.view-dto";
+import { UserViewDtoPg } from "../../modules/user-accounts/users/api/view-dto/users.view-dto.pg";
 import { CreateUserInputDto } from "../../modules/user-accounts/users/api/input-dto/users.input-dto";
 
 const DEFAULT_USER_PASSWORD = "qwerty12345";
@@ -11,8 +11,8 @@ export const createTestUsers = async ({
 }: {
   password?: string;
   count?: number;
-}): Promise<UserViewDto[]> => {
-  const result: UserViewDto[] = [];
+}): Promise<UserViewDtoPg[]> => {
+  const result: UserViewDtoPg[] = [];
 
   for (let i = 0; i < count; i++) {
     const uniqueId = Number(Date.now()).toString().substring(8);
@@ -35,7 +35,7 @@ export const createTestUsers = async ({
 };
 
 export const getUsersJwtTokens = async (
-  users: UserViewDto[],
+  users: UserViewDtoPg[],
 ): Promise<string[]> => {
   const result: string[] = [];
 

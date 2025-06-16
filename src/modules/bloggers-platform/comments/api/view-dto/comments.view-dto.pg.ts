@@ -1,7 +1,7 @@
-import { LikeStatusEnum } from "../../../likes/enums/likes.enum";
+import { LikeStatusEnum } from "../../../enums/likes.enum";
 import { CommentQuerySelectType } from "../../infrastructure/types/commentQueryType";
 
-export class CommentViewDtoPgInputType{
+export class CommentViewDtoPgInputType {
   comment: CommentQuerySelectType;
   likesCount?: number;
   dislikesCount?: number;

@@ -1,32 +1,19 @@
-import mongoose from "mongoose";
-import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-
-import { DomainException } from "../../../../core/exceptions/domain-exceptions";
-import {
-  Comment,
-  CommentDocument,
-  CommentModelType,
-} from "../domain/comment.entity";
-import { DomainExceptionCode } from "../../../../core/exceptions/domain-exception-codes";
-import { PostEntityType } from "../../posts/domain/post.entity.pg";
-import { SETTINGS } from "../../../../settings";
-import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
-import { CommentEntityType } from "../domain/comment.entity.pg";
+import { Injectable } from "@nestjs/common";
 import { validate as isValidUUID } from "uuid";
-import { CommentViewDtoPg } from "../api/view-dto/comments.view-dto.pg";
+import { InjectDataSource } from "@nestjs/typeorm";
+
+import { SETTINGS } from "../../../../settings";
+import { CommentEntityType } from "../domain/comment.entity.pg";
+import { LikeStatusEnum } from "../../enums/likes.enum";
 import { CommentQuerySelectType } from "./types/commentQueryType";
-import { LikeStatusEnum } from "../../likes/enums/likes.enum";
-import { PostLikeEntity } from "../../posts/domain/postLike.entity.pg";
 import { CommentLikeEntity } from "../domain/commentLike.entity.pg";
+import { DomainException } from "../../../../core/exceptions/domain-exceptions";
+import { DomainExceptionCode } from "../../../../core/exceptions/domain-exception-codes";
 
 @Injectable()
 export class CommentsRepository {
-  constructor(
-    @InjectModel(Comment.name) private CommentModel: CommentModelType,
-    @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createComment_pg(comment: CommentEntityType): Promise<void> {
     const query = `
@@ -198,10 +185,7 @@ export class CommentsRepository {
     `;
 
     try {
-      await this.dataSource.query(query, [
-        dto.content,
-        dto.commentId,
-      ]);
+      await this.dataSource.query(query, [dto.content, dto.commentId]);
     } catch (e) {
       console.log(e);
       throw new DomainException({
@@ -359,44 +343,4 @@ export class CommentsRepository {
       });
     }
   }
-  //
-  // async save(comment: CommentDocument) {
-  //   await comment.save();
-  // }
-  //
-  // async getByIdOrNotFoundFail(id: string): Promise<CommentDocument> {
-  //   const isObjectId = mongoose.Types.ObjectId.isValid(id);
-  //   if (!isObjectId) {
-  //     throw new DomainException({
-  //       code: DomainExceptionCode.NotFound,
-  //       message: "Comment not found",
-  //       extensions: [
-  //         {
-  //           field: "",
-  //           message: "Comment not found",
-  //         },
-  //       ],
-  //     });
-  //   }
-  //
-  //   const comment = await this.CommentModel.findOne({
-  //     _id: id,
-  //     deletedAt: null,
-  //   });
-  //
-  //   if (!comment) {
-  //     throw new DomainException({
-  //       code: DomainExceptionCode.NotFound,
-  //       message: "Comment not found",
-  //       extensions: [
-  //         {
-  //           field: "",
-  //           message: "Comment not found",
-  //         },
-  //       ],
-  //     });
-  //   }
-  //
-  //   return comment;
-  // }
 }

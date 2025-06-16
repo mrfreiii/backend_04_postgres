@@ -1,21 +1,15 @@
-import { InjectModel } from "@nestjs/mongoose";
+import { DataSource } from "typeorm";
 import { Injectable } from "@nestjs/common";
+import { InjectDataSource } from "@nestjs/typeorm";
 
-import { User, UserModelType } from "../../domain/user.entity";
-import { UserExternalDto } from "./external-dto/users.external-dto";
+import { SETTINGS } from "../../../../../settings";
+import { UserViewDtoPg } from "../../api/view-dto/users.view-dto.pg";
 import { DomainException } from "../../../../../core/exceptions/domain-exceptions";
 import { DomainExceptionCode } from "../../../../../core/exceptions/domain-exception-codes";
-import { UserViewDtoPg } from "../../api/view-dto/users.view-dto.pg";
-import { SETTINGS } from "../../../../../settings";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
 
 @Injectable()
 export class UsersExternalQueryRepository {
-  constructor(
-    @InjectModel(User.name) private UserModel: UserModelType,
-    @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getByIdOrNotFoundFail_pg(id: string): Promise<UserViewDtoPg> {
     const query = `
@@ -42,27 +36,5 @@ export class UsersExternalQueryRepository {
         ],
       });
     }
-  }
-
-  async getByIdOrNotFoundFail(id: string): Promise<UserExternalDto> {
-    const user = await this.UserModel.findOne({
-      _id: id,
-      deletedAt: null,
-    });
-
-    if (!user) {
-      throw new DomainException({
-        code: DomainExceptionCode.NotFound,
-        message: "User not found",
-        extensions: [
-          {
-            field: "",
-            message: "User not found",
-          },
-        ],
-      });
-    }
-
-    return UserExternalDto.mapToView(user);
   }
 }

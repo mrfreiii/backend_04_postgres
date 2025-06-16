@@ -1,6 +1,6 @@
-import { PostViewDto } from "../../api/view-dto/posts.view-dto";
+import { PostViewDtoPg } from "../../api/view-dto/posts.view-dto.pg";
 
 export class GetLikesStatusesForPostsDto {
-  posts: PostViewDto[];
+  posts: PostViewDtoPg[];
   userId: string | null;
 }

@@ -3,7 +3,7 @@ import { IsEmail, IsString, Length, Matches } from "class-validator";
 import {
   loginConstraints,
   passwordConstraints,
-} from "../../../users/domain/user.entity";
+} from "../../../users/domain/user.entity.pg";
 import { Trim } from "../../../../../core/decorators/transform/trim";
 import { IsStringWithTrim } from "../../../../../core/decorators/validation/is-string-with-trim";
 

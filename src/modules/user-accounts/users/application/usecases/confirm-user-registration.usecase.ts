@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 
-import { DomainExceptionCode } from "../../../../../core/exceptions/domain-exception-codes";
 import { UsersRepository } from "../../infrastructure/users.repository";
 import { DomainException } from "../../../../../core/exceptions/domain-exceptions";
+import { DomainExceptionCode } from "../../../../../core/exceptions/domain-exception-codes";
 
 export class ConfirmUserRegistrationCommand {
   constructor(public code: string) {}

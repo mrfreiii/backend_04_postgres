@@ -1,7 +1,7 @@
-import { req, testBasicAuthHeader } from "../helpers";
 import { SETTINGS } from "../../settings";
-import { PostViewDto } from "../../modules/bloggers-platform/posts/api/view-dto/posts.view-dto";
+import { req, testBasicAuthHeader } from "../helpers";
 import { CreatePostInputDto } from "../../modules/bloggers-platform/posts/api/input-dto/posts.input-dto";
+import { PostViewDtoPg } from "../../modules/bloggers-platform/posts/api/view-dto/posts.view-dto.pg";
 
 export const createTestPosts = async ({
   blogId,
@@ -9,8 +9,8 @@ export const createTestPosts = async ({
 }: {
   blogId: string;
   count?: number;
-}): Promise<PostViewDto[]> => {
-  const result: PostViewDto[] = [];
+}): Promise<PostViewDtoPg[]> => {
+  const result: PostViewDtoPg[] = [];
 
   for (let i = 0; i < count; i++) {
     const post: CreatePostInputDto = {

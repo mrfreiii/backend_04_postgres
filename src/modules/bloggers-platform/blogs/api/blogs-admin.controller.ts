@@ -79,32 +79,17 @@ export class BlogsAdminController {
   ): Promise<PostViewDtoPg> {
     await this.blogsQueryRepository.getByIdOrNotFoundFail_pg(id);
 
-    const postId = await this.postsService.createPost({ ...body, blogId: id });
+    const postId = await this.postsService.createPost_pg({ ...body, blogId: id });
 
     return this.postsQueryRepository.getByIdOrNotFoundFail_pg(postId);
   }
 
-  // @ApiBearerAuth()
-  // @UseGuards(JwtOptionalAuthGuard)
-  // @Public()
   @Get(":id/posts")
   async getPostsByBlogId(
     @Query() query: GetPostsQueryParams,
     @Param("id") id: string,
-    // @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
   ): Promise<PaginatedViewDto<PostViewDtoPg[]>> {
     await this.blogsQueryRepository.getByIdOrNotFoundFail_pg(id);
-
-    // const allPosts = await this.postsQueryRepository.getAll({
-    //   query,
-    //   blogId: id,
-    // });
-    // if (user?.id) {
-    //   allPosts.items = await this.postsService.getLikeStatusesForPosts({
-    //     userId: user.id,
-    //     posts: allPosts.items,
-    //   });
-    // }
 
     return this.postsQueryRepository.getAll_pg({
       requestParams: query,
@@ -119,7 +104,7 @@ export class BlogsAdminController {
     @Param("postId") postId: string,
     @Body() body: UpdatePostByBlogInputDto,
   ): Promise<void> {
-    return this.postsService.updatePost({
+    return this.postsService.updatePost_pg({
       id: postId,
       dto: {
         ...body,
@@ -134,7 +119,7 @@ export class BlogsAdminController {
     @Param("blogId") blogId: string,
     @Param("postId") postId: string,
   ): Promise<void> {
-    return this.postsService.deletePost({
+    return this.postsService.deletePost_pg({
       postId,
       blogId,
     });

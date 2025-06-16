@@ -12,24 +12,19 @@ export function appSetup({
   app: NestExpressApplication;
   env?: "e2e_tests" | "common";
 }) {
+  pipesSetup(app);
+
+  app.enableCors();
+  app.use(cookieParser());
+
+  app.set("trust proxy", true);
+
   switch (env) {
     case "common":
-      pipesSetup(app);
       globalPrefixSetup(app);
       swaggerSetup(app);
-
-      app.enableCors();
-      app.use(cookieParser());
-
-      app.set("trust proxy", true);
       break;
     case "e2e_tests":
-      pipesSetup(app);
-
-      app.enableCors();
-      app.use(cookieParser());
-
-      app.set("trust proxy", true);
       break;
   }
 }

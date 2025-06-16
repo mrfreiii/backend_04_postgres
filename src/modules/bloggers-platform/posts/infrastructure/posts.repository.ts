@@ -1,26 +1,19 @@
-import mongoose from "mongoose";
-import { InjectModel } from "@nestjs/mongoose";
+import { DataSource } from "typeorm";
 import { Injectable } from "@nestjs/common";
+import { validate as isValidUUID } from "uuid";
+import { InjectDataSource } from "@nestjs/typeorm";
 
-import { Post, PostDocument, PostModelType } from "../domain/post.entity";
+import { SETTINGS } from "../../../../settings";
+import { NewestLikesPg } from "../../types/likes.types";
+import { LikeStatusEnum } from "../../enums/likes.enum";
+import { PostEntityType } from "../domain/post.entity.pg";
+import { PostLikeEntity } from "../domain/postLike.entity.pg";
 import { DomainException } from "../../../../core/exceptions/domain-exceptions";
 import { DomainExceptionCode } from "../../../../core/exceptions/domain-exception-codes";
-import { BlogEntityType } from "../../blogs/domain/blog.entity.pg";
-import { SETTINGS } from "../../../../settings";
-import { PostEntityType } from "../domain/post.entity.pg";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
-import { validate as isValidUUID } from "uuid";
-import { PostLikeEntity } from "../domain/postLike.entity.pg";
-import { LikeStatusEnum } from "../../likes/enums/likes.enum";
-import { NewestLikes } from "../domain/newestLikes.schema";
 
 @Injectable()
 export class PostsRepository {
-  constructor(
-    @InjectModel(Post.name) private PostModel: PostModelType,
-    @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async createPost_pg(post: PostEntityType): Promise<void> {
     const query = `
@@ -319,7 +312,7 @@ export class PostsRepository {
     }
   }
 
-  async getPostLastThreeLikes_pg(postId: string): Promise<NewestLikes[]> {
+  async getPostLastThreeLikes_pg(postId: string): Promise<NewestLikesPg[]> {
     const query = `
        SELECT pl."updatedAt" as "addedAt",
               pl."userId",
@@ -337,10 +330,7 @@ export class PostsRepository {
     `;
 
     try {
-      return this.dataSource.query(query, [
-        postId,
-        LikeStatusEnum.Like,
-      ]);
+      return this.dataSource.query(query, [postId, LikeStatusEnum.Like]);
     } catch (e) {
       console.log(e);
       throw new DomainException({
@@ -372,7 +362,10 @@ export class PostsRepository {
     `;
 
     try {
-      const response = await this.dataSource.query(query, [dto.postId, dto.userId]);
+      const response = await this.dataSource.query(query, [
+        dto.postId,
+        dto.userId,
+      ]);
       return response?.[0]?.status;
     } catch (e) {
       console.log(e);
@@ -388,46 +381,4 @@ export class PostsRepository {
       });
     }
   }
-
-  // async save(post: PostDocument) {
-  //   await post.save();
-  // }
-  // async findById(id: string): Promise<PostDocument | null> {
-  //   const isObjectId = mongoose.Types.ObjectId.isValid(id);
-  //   if (!isObjectId) {
-  //     throw new DomainException({
-  //       code: DomainExceptionCode.NotFound,
-  //       message: "Post not found",
-  //       extensions: [
-  //         {
-  //           field: "",
-  //           message: "Post not found",
-  //         },
-  //       ],
-  //     });
-  //   }
-  //
-  //   return this.PostModel.findOne({
-  //     _id: id,
-  //     deletedAt: null,
-  //   });
-  // }
-  // async findOrNotFoundFail(id: string): Promise<PostDocument> {
-  //   const post = await this.findById(id);
-  //
-  //   if (!post) {
-  //     throw new DomainException({
-  //       code: DomainExceptionCode.NotFound,
-  //       message: "Post not found",
-  //       extensions: [
-  //         {
-  //           field: "",
-  //           message: "Post not found",
-  //         },
-  //       ],
-  //     });
-  //   }
-  //
-  //   return post;
-  // }
 }

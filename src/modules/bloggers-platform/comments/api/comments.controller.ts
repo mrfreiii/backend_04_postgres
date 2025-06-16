@@ -13,14 +13,14 @@ import { ApiBearerAuth } from "@nestjs/swagger";
 
 import { SETTINGS } from "../../../../settings";
 import { CommentsService } from "../application/comments.service";
+import { CommentViewDtoPg } from "./view-dto/comments.view-dto.pg";
 import { UpdateCommentInputDto } from "./input-dto/update-comment.input-dto";
-import { UserContextDto } from "../../../user-accounts/guards/dto/user-context.dto";
 import { JwtAuthGuard } from "../../../user-accounts/guards/bearer/jwt-auth.guard";
-import { ExtractUserFromRequest } from "../../../user-accounts/guards/decorators/param/extract-user-from-request.decorator";
+import { UserContextDto } from "../../../user-accounts/guards/dto/user-context.dto";
 import { UpdateLikeStatusInputDto } from "./input-dto/update-like-status.input-dto";
 import { JwtOptionalAuthGuard } from "../../../user-accounts/guards/bearer/jwt-optional-auth.guard";
+import { ExtractUserFromRequest } from "../../../user-accounts/guards/decorators/param/extract-user-from-request.decorator";
 import { ExtractUserIfExistsFromRequest } from "../../../user-accounts/guards/decorators/param/extract-user-if-exists-from-request.decorator";
-import { CommentViewDtoPg } from "./view-dto/comments.view-dto.pg";
 
 @Controller(SETTINGS.PATH.COMMENTS)
 export class CommentsController {
@@ -84,11 +84,4 @@ export class CommentsController {
       newLikeStatus: body.likeStatus,
     });
   }
-
-  // @Get()
-  // async getAll(
-  //   @Query() query: GetCommentsQueryParams,
-  // ): Promise<PaginatedViewDto<CommentViewDto[]>> {
-  //   return this.commentsQueryRepository.getAll({ query });
-  // }
 }
