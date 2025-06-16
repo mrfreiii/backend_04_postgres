@@ -10,8 +10,8 @@ import { SETTINGS } from "../../../../settings";
 import { PostEntityType } from "../domain/post.entity.pg";
 import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
-import { PostViewDtoPg } from "../api/view-dto/posts.view-dto.pg";
 import { validate as isValidUUID } from "uuid";
+import { PostLikeEntity } from "../domain/postLike.entity.pg";
 
 @Injectable()
 export class PostsRepository {
@@ -162,6 +162,121 @@ export class PostsRepository {
           {
             field: "",
             message: "Failed to delete post",
+          },
+        ],
+      });
+    }
+  }
+
+  async findPostLike_pg(dto: {
+    postId: string;
+    userId: string;
+  }): Promise<PostLikeEntity> {
+    const query = `
+       SELECT * FROM ${SETTINGS.TABLES.POSTS_LIKES}
+       WHERE "postId" = $1 AND "userId" = $2
+    `;
+
+    try {
+      const result = await this.dataSource.query(query, [
+        dto.postId,
+        dto.userId,
+      ]);
+      return result?.[0];
+    } catch {
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get post like from db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to get post like from db",
+          },
+        ],
+      });
+    }
+  }
+
+  async createPostLike_pg(postLike: PostLikeEntity): Promise<void> {
+    const query = `
+        INSERT INTO ${SETTINGS.TABLES.POSTS_LIKES}
+            ("postId","userId","likeStatus","updatedAt")
+            VALUES
+            ($1, $2, $3, $4)
+    `;
+
+    try {
+      await this.dataSource.query(query, [
+        postLike.postId,
+        postLike.userId,
+        postLike.likeStatus,
+        postLike.updatedAt,
+      ]);
+    } catch (e) {
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to create post like in db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to create post like in db",
+          },
+        ],
+      });
+    }
+  }
+
+  async deletePostLike_pg(postLikeId: number): Promise<void> {
+    const query = `
+        DELETE FROM ${SETTINGS.TABLES.POSTS_LIKES}
+        WHERE "id" = $1
+    `;
+
+    try {
+      await this.dataSource.query(query, [postLikeId]);
+    } catch (e) {
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to delete post like in db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to delete post like in db",
+          },
+        ],
+      });
+    }
+  }
+
+  async updatePostLike_pg(dto: {
+    postLikeId: number;
+    newLikeStatus: number;
+    updatedAt: string;
+  }): Promise<void> {
+    const query = `
+       UPDATE ${SETTINGS.TABLES.POSTS_LIKES}
+        SET "likeStatus" = $1,
+            "updatedAt" = $2
+        WHERE "id" = $3
+    `;
+
+    try {
+      await this.dataSource.query(query, [
+        dto.newLikeStatus,
+        dto.updatedAt,
+        dto.postLikeId,
+      ]);
+    } catch (e) {
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to update post like in db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to update post like in db",
           },
         ],
       });

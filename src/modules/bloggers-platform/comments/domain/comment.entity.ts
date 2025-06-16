@@ -64,7 +64,7 @@ export class Comment {
 
     comment.postId = dto.postId;
     comment.content = dto.content;
-    comment.commentatorInfo = dto.commentatorInfo;
+    comment.commentatorInfo = dto.commentatorInfo!;
     comment.likesInfo = {
       likesCount: 0,
       dislikesCount: 0,

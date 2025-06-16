@@ -14,6 +14,7 @@ import { CommentViewDto } from "../api/view-dto/comments.view-dto";
 import { GetCommentInputDto } from "./dto/get-comment.input-dto";
 import { LikesRepository } from "../../likes/infrastructure/likes.repository";
 import { GetCommentsLikesStatusesDto } from "./dto/get-comments-like-statuses.dto";
+import { CommentEntity } from "../domain/comment.entity.pg";
 
 @Injectable()
 export class CommentsService {
@@ -23,6 +24,7 @@ export class CommentsService {
     private usersExternalQueryRepository: UsersExternalQueryRepository,
     private likesService: LikesService,
     private likesRepository: LikesRepository,
+    private commentEntity: CommentEntity,
   ) {}
 
   async getCommentById(dto: GetCommentInputDto): Promise<CommentViewDto> {
@@ -46,22 +48,20 @@ export class CommentsService {
   }
 
   async createComment(dto: CreateCommentDto): Promise<string> {
-    const user = await this.usersExternalQueryRepository.getByIdOrNotFoundFail(
-      dto.userId,
-    );
+    const user =
+      await this.usersExternalQueryRepository.getByIdOrNotFoundFail_pg(
+        dto.userId,
+      );
 
-    const comment = this.CommentModel.createInstance({
-      postId: dto.postId,
+    const comment = this.commentEntity.createInstance({
       content: dto.content,
-      commentatorInfo: {
-        userId: dto.userId,
-        userLogin: user?.login,
-      },
+      postId: dto.postId,
+      userId: user.id,
     });
 
-    await this.commentsRepository.save(comment);
+    await this.commentsRepository.createComment_pg(comment);
 
-    return comment._id.toString();
+    return comment.id;
   }
 
   async updateComment({

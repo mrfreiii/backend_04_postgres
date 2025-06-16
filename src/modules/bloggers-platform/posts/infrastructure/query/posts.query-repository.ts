@@ -78,7 +78,7 @@ export class PostsQueryRepository {
         ],
       });
     }
-    return PostViewDtoPg.mapToView(post);
+    return PostViewDtoPg.mapToView({ post });
   }
 
   async getAll_pg({
@@ -121,20 +121,34 @@ export class PostsQueryRepository {
          OFFSET ${requestParams.calculateSkip()}
     `;
 
-    const posts = await this.dataSource.query(dataQuery, [...queryParams]);
+    try {
+      const posts = await this.dataSource.query(dataQuery, [...queryParams]);
 
-    const totalCountRes = await this.dataSource.query(countQuery, [
-      ...queryParams,
-    ]);
+      const totalCountRes = await this.dataSource.query(countQuery, [
+        ...queryParams,
+      ]);
 
-    const items = posts.map(PostViewDtoPg.mapToView);
+      const items = posts.map((p) => PostViewDtoPg.mapToView({ post: p }));
 
-    return PaginatedViewDto.mapToView({
-      items,
-      totalCount: Number(totalCountRes?.[0]?.count),
-      page: requestParams.pageNumber,
-      size: requestParams.pageSize,
-    });
+      return PaginatedViewDto.mapToView({
+        items,
+        totalCount: Number(totalCountRes?.[0]?.count),
+        page: requestParams.pageNumber,
+        size: requestParams.pageSize,
+      });
+    } catch (e) {
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get posts from db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to get posts from db",
+          },
+        ],
+      });
+    }
   }
 
   async getAll({

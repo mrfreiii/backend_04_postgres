@@ -19,6 +19,7 @@ import { PostsService } from "./posts/application/posts.service";
 import { PostsRepository } from "./posts/infrastructure/posts.repository";
 import { PostsQueryRepository } from "./posts/infrastructure/query/posts.query-repository";
 
+import { CommentEntity } from "./comments/domain/comment.entity.pg";
 import { CommentsController } from "./comments/api/comments.controller";
 import { Comment, CommentSchema } from "./comments/domain/comment.entity";
 import { CommentsService } from "./comments/application/comments.service";
@@ -37,6 +38,13 @@ const schemas = [
   { name: Like.name, schema: LikeSchema },
 ];
 
+const controllers = [
+  BlogsAdminController,
+  BlogsPublicController,
+  PostsController,
+  CommentsController,
+];
+
 const services = [BlogsService, PostsService, CommentsService, LikesService];
 
 const repos = [
@@ -51,11 +59,11 @@ const repos = [
   LikesQueryRepository,
 ];
 
-const entities = [BlogEntity, PostEntity];
+const entities = [BlogEntity, PostEntity, CommentEntity];
 
 @Module({
   imports: [MongooseModule.forFeature([...schemas]), UserAccountsModule],
-  controllers: [BlogsAdminController, BlogsPublicController, PostsController, CommentsController],
+  controllers: [...controllers],
   providers: [...services, ...repos, ...entities],
   exports: [],
 })

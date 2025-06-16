@@ -1,6 +1,13 @@
 import { DataSource } from "typeorm";
 import { InjectDataSource } from "@nestjs/typeorm";
-import { Controller, Delete, Get, HttpCode, HttpStatus, Param, } from "@nestjs/common";
+import {
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+} from "@nestjs/common";
 
 import { SETTINGS } from "../../settings";
 import { DomainException } from "../../core/exceptions/domain-exceptions";
@@ -17,13 +24,17 @@ export class TestingController {
   @Delete("all-data")
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteAll() {
-    const promises = Object.keys(SETTINGS.TABLES).map((key) => {
-      const query = `
+    const skipTables = [SETTINGS.TABLES.LIKES_STATUSES];
+
+    const promises = Object.keys(SETTINGS.TABLES)
+      .filter((key) => !skipTables.includes(SETTINGS.TABLES[key]))
+      .map((key) => {
+        const query = `
        TRUNCATE TABLE ${SETTINGS.TABLES[key]} RESTART IDENTITY CASCADE;
     `;
 
-      return this.dataSource.query(query);
-    });
+        return this.dataSource.query(query);
+      });
 
     try {
       await Promise.all(promises);
