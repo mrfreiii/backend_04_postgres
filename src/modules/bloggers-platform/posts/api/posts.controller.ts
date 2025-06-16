@@ -111,10 +111,11 @@ export class PostsController {
       postId: id,
     });
 
-    const commentsWithLikesInfo = await this.commentsService.getCommentsLikeInfo_pg({
-      comments: paginatedComments.items,
-      userId: user?.id || null,
-    });
+    const commentsWithLikesInfo =
+      await this.commentsService.getCommentsLikeInfo_pg({
+        comments: paginatedComments.items,
+        userId: user?.id || null,
+      });
 
     return {
       ...paginatedComments,

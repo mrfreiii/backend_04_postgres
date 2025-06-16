@@ -57,25 +57,24 @@ export class BlogsPublicController {
   async getPostsByBlogId(
     @Query() query: GetPostsQueryParams,
     @Param("id") id: string,
-    // @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
+    @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
   ): Promise<PaginatedViewDto<PostViewDtoPg[]>> {
     await this.blogsQueryRepository.getByIdOrNotFoundFail_pg(id);
 
-    // const allPosts = await this.postsQueryRepository.getAll({
-    //   query,
-    //   blogId: id,
-    // });
-    // if (user?.id) {
-    //   allPosts.items = await this.postsService.getLikeStatusesForPosts({
-    //     userId: user.id,
-    //     posts: allPosts.items,
-    //   });
-    // }
-
-    return this.postsQueryRepository.getAll_pg({
+    const paginatedPosts = await this.postsQueryRepository.getAll_pg({
       requestParams: query,
       blogId: id,
     });
+
+    const postsWithLikesInfo = await this.postsService.getPostsLikeInfo_pg({
+      posts: paginatedPosts.items,
+      userId: user?.id || null,
+    });
+
+    return {
+      ...paginatedPosts,
+      items: postsWithLikesInfo,
+    };
   }
 
   @Get(":id")
