@@ -26,61 +26,61 @@ export class CommentsQueryRepository {
     @InjectDataSource() private dataSource: DataSource,
   ) {}
 
-  async getByIdOrNotFoundFail_pg(commentId: string): Promise<CommentViewDtoPg> {
-    if (!isValidUUID(commentId)) {
-      throw new DomainException({
-        code: DomainExceptionCode.NotFound,
-        message: "Comment not found",
-        extensions: [
-          {
-            field: "",
-            message: "Comment not found",
-          },
-        ],
-      });
-    }
-
-    let comment: CommentQuerySelectType;
-
-    const query = `
-       SELECT c.*, u."login" as "userLogin"
-       FROM ${SETTINGS.TABLES.COMMENTS} c
-         LEFT JOIN ${SETTINGS.TABLES.USERS} u
-         ON c."userId" = u."id"
-           WHERE c."id" = $1 AND c."deletedAt" IS NULL
-    `;
-
-    try {
-      const result = await this.dataSource.query(query, [commentId]);
-      comment = result?.[0];
-    } catch (e) {
-      console.log(e);
-      throw new DomainException({
-        code: DomainExceptionCode.InternalServerError,
-        message: "Failed to get comment from db",
-        extensions: [
-          {
-            field: "",
-            message: "Failed to get comment from db",
-          },
-        ],
-      });
-    }
-
-    if (!comment) {
-      throw new DomainException({
-        code: DomainExceptionCode.NotFound,
-        message: "Comment not found",
-        extensions: [
-          {
-            field: "",
-            message: "Comment not found",
-          },
-        ],
-      });
-    }
-    return CommentViewDtoPg.mapToView(comment);
-  }
+  // async getByIdOrNotFoundFail_pg(commentId: string): Promise<CommentViewDtoPg> {
+  //   if (!isValidUUID(commentId)) {
+  //     throw new DomainException({
+  //       code: DomainExceptionCode.NotFound,
+  //       message: "Comment not found",
+  //       extensions: [
+  //         {
+  //           field: "",
+  //           message: "Comment not found",
+  //         },
+  //       ],
+  //     });
+  //   }
+  //
+  //   let comment: CommentQuerySelectType;
+  //
+  //   const query = `
+  //      SELECT c.*, u."login" as "userLogin"
+  //      FROM ${SETTINGS.TABLES.COMMENTS} c
+  //        LEFT JOIN ${SETTINGS.TABLES.USERS} u
+  //        ON c."userId" = u."id"
+  //          WHERE c."id" = $1 AND c."deletedAt" IS NULL
+  //   `;
+  //
+  //   try {
+  //     const result = await this.dataSource.query(query, [commentId]);
+  //     comment = result?.[0];
+  //   } catch (e) {
+  //     console.log(e);
+  //     throw new DomainException({
+  //       code: DomainExceptionCode.InternalServerError,
+  //       message: "Failed to get comment from db",
+  //       extensions: [
+  //         {
+  //           field: "",
+  //           message: "Failed to get comment from db",
+  //         },
+  //       ],
+  //     });
+  //   }
+  //
+  //   if (!comment) {
+  //     throw new DomainException({
+  //       code: DomainExceptionCode.NotFound,
+  //       message: "Comment not found",
+  //       extensions: [
+  //         {
+  //           field: "",
+  //           message: "Comment not found",
+  //         },
+  //       ],
+  //     });
+  //   }
+  //   return CommentViewDtoPg.mapToView(comment);
+  // }
 
   async getAll_pg({
     requestParams,
@@ -127,7 +127,9 @@ export class CommentsQueryRepository {
       ...queryParams,
     ]);
 
-    const items = comments.map(CommentViewDtoPg.mapToView);
+    const items = comments.map((c) =>
+      CommentViewDtoPg.mapToView({ comment: c }),
+    );
 
     return PaginatedViewDto.mapToView({
       items,

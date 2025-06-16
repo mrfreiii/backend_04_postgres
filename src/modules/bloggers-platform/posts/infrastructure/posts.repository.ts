@@ -12,6 +12,8 @@ import { InjectDataSource } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { validate as isValidUUID } from "uuid";
 import { PostLikeEntity } from "../domain/postLike.entity.pg";
+import { LikeStatusEnum } from "../../likes/enums/likes.enum";
+import { NewestLikes } from "../domain/newestLikes.schema";
 
 @Injectable()
 export class PostsRepository {
@@ -283,47 +285,149 @@ export class PostsRepository {
     }
   }
 
-  async save(post: PostDocument) {
-    await post.save();
-  }
+  async getPostLikesStatusCount_pg(dto: {
+    postId: string;
+    likeStatus: LikeStatusEnum;
+  }): Promise<number> {
+    const query = `
+       SELECT count(pl.*) 
+       FROM ${SETTINGS.TABLES.POSTS_LIKES} pl
+       LEFT JOIN ${SETTINGS.TABLES.LIKES_STATUSES} ls
+       ON pl."likeStatus" = ls."id"
+       WHERE pl."postId" = $1
+       AND ls."status" = $2
+    `;
 
-  async findById(id: string): Promise<PostDocument | null> {
-    const isObjectId = mongoose.Types.ObjectId.isValid(id);
-    if (!isObjectId) {
+    try {
+      const result = await this.dataSource.query(query, [
+        dto.postId,
+        dto.likeStatus,
+      ]);
+      return Number(result?.[0]?.count);
+    } catch (e) {
+      console.log(e);
       throw new DomainException({
-        code: DomainExceptionCode.NotFound,
-        message: "Post not found",
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get post likes status count from db",
         extensions: [
           {
             field: "",
-            message: "Post not found",
+            message: "Failed to get post likes status count from db",
           },
         ],
       });
     }
-
-    return this.PostModel.findOne({
-      _id: id,
-      deletedAt: null,
-    });
   }
 
-  async findOrNotFoundFail(id: string): Promise<PostDocument> {
-    const post = await this.findById(id);
+  async getPostLastThreeLikes_pg(postId: string): Promise<NewestLikes[]> {
+    const query = `
+       SELECT pl."updatedAt" as "addedAt",
+              pl."userId",
+              u."login"
+       FROM ${SETTINGS.TABLES.POSTS_LIKES} pl
+       LEFT JOIN ${SETTINGS.TABLES.LIKES_STATUSES} ls
+         ON pl."likeStatus" = ls."id"
+           LEFT JOIN ${SETTINGS.TABLES.USERS} u
+           ON pl."userId" = u."id"
+             WHERE pl."postId" = $1
+             AND ls."status" = $2
+               ORDER BY pl."updatedAt" desc
+               LIMIT 3
+               OFFSET 0
+    `;
 
-    if (!post) {
+    try {
+      return this.dataSource.query(query, [
+        postId,
+        LikeStatusEnum.Like,
+      ]);
+    } catch (e) {
+      console.log(e);
       throw new DomainException({
-        code: DomainExceptionCode.NotFound,
-        message: "Post not found",
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get post last three likes from db",
         extensions: [
           {
             field: "",
-            message: "Post not found",
+            message: "Failed to get post last three likes from db",
           },
         ],
       });
     }
-
-    return post;
   }
+
+  async getUserPostLikeStatus_pg(dto: {
+    postId: string;
+    userId: string;
+  }): Promise<LikeStatusEnum> {
+    const query = `
+       SELECT ls."status"
+       FROM ${SETTINGS.TABLES.POSTS_LIKES} pl
+       LEFT JOIN ${SETTINGS.TABLES.LIKES_STATUSES} ls
+         ON pl."likeStatus" = ls."id"
+           LEFT JOIN ${SETTINGS.TABLES.USERS} u
+           ON pl."userId" = u."id"
+             WHERE pl."postId" = $1
+             AND pl."userId" = $2
+    `;
+
+    try {
+      const response = await this.dataSource.query(query, [dto.postId, dto.userId]);
+      return response?.[0]?.status;
+    } catch (e) {
+      console.log(e);
+      throw new DomainException({
+        code: DomainExceptionCode.InternalServerError,
+        message: "Failed to get user post like status from db",
+        extensions: [
+          {
+            field: "",
+            message: "Failed to get user post like status from db",
+          },
+        ],
+      });
+    }
+  }
+
+  // async save(post: PostDocument) {
+  //   await post.save();
+  // }
+  // async findById(id: string): Promise<PostDocument | null> {
+  //   const isObjectId = mongoose.Types.ObjectId.isValid(id);
+  //   if (!isObjectId) {
+  //     throw new DomainException({
+  //       code: DomainExceptionCode.NotFound,
+  //       message: "Post not found",
+  //       extensions: [
+  //         {
+  //           field: "",
+  //           message: "Post not found",
+  //         },
+  //       ],
+  //     });
+  //   }
+  //
+  //   return this.PostModel.findOne({
+  //     _id: id,
+  //     deletedAt: null,
+  //   });
+  // }
+  // async findOrNotFoundFail(id: string): Promise<PostDocument> {
+  //   const post = await this.findById(id);
+  //
+  //   if (!post) {
+  //     throw new DomainException({
+  //       code: DomainExceptionCode.NotFound,
+  //       message: "Post not found",
+  //       extensions: [
+  //         {
+  //           field: "",
+  //           message: "Post not found",
+  //         },
+  //       ],
+  //     });
+  //   }
+  //
+  //   return post;
+  // }
 }

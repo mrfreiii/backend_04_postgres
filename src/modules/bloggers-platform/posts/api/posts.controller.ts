@@ -84,13 +84,16 @@ export class PostsController {
   ): Promise<CommentViewDtoPg> {
     await this.postsQueryRepository.getByIdOrNotFoundFail_pg(id);
 
-    const commentId = await this.commentsService.createComment({
+    const commentId = await this.commentsService.createComment_pg({
       content: body.content,
       postId: id,
       userId: user.id,
     });
 
-    return this.commentsQueryRepository.getByIdOrNotFoundFail_pg(commentId);
+    return this.commentsService.getCommentById_pg({
+      commentId,
+      userId: null,
+    });
   }
 
   @ApiBearerAuth()
@@ -99,25 +102,24 @@ export class PostsController {
   async getCommentsByPostId(
     @Query() query: GetCommentsQueryParams,
     @Param("id") id: string,
-    // @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
+    @ExtractUserIfExistsFromRequest() user: UserContextDto | null,
   ): Promise<PaginatedViewDto<CommentViewDtoPg[]>> {
     await this.postsQueryRepository.getByIdOrNotFoundFail_pg(id);
 
-    const allComments = await this.commentsQueryRepository.getAll_pg({
+    const paginatedComments = await this.commentsQueryRepository.getAll_pg({
       requestParams: query,
       postId: id,
     });
 
-    // if (user?.id) {
-    //   allComments.items = await this.commentsService.getLikeStatusesForComments(
-    //     {
-    //       userId: user.id,
-    //       comments: allComments.items,
-    //     },
-    //   );
-    // }
+    const commentsWithLikesInfo = await this.commentsService.getCommentsLikeInfo_pg({
+      comments: paginatedComments.items,
+      userId: user?.id || null,
+    });
 
-    return allComments;
+    return {
+      ...paginatedComments,
+      items: commentsWithLikesInfo,
+    };
   }
 
   @UseGuards(JwtAuthGuard)

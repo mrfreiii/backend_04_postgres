@@ -1,5 +1,12 @@
-import { CommentQuerySelectType } from "../../infrastructure/types/commentQueryType";
 import { LikeStatusEnum } from "../../../likes/enums/likes.enum";
+import { CommentQuerySelectType } from "../../infrastructure/types/commentQueryType";
+
+export class CommentViewDtoPgInputType{
+  comment: CommentQuerySelectType;
+  likesCount?: number;
+  dislikesCount?: number;
+  myStatus?: LikeStatusEnum;
+}
 
 export class CommentViewDtoPg {
   id: string;
@@ -15,25 +22,22 @@ export class CommentViewDtoPg {
     myStatus: string;
   };
 
-  static mapToView(comment: CommentQuerySelectType): CommentViewDtoPg {
-    const dto = new CommentViewDtoPg();
+  static mapToView(dto: CommentViewDtoPgInputType): CommentViewDtoPg {
+    const comment = new CommentViewDtoPg();
 
-    dto.id = comment.id;
-    dto.content = comment.content;
-    dto.commentatorInfo = {
-      userId: comment.userId,
-      userLogin: comment.userLogin,
+    comment.id = dto.comment.id;
+    comment.content = dto.comment.content;
+    comment.commentatorInfo = {
+      userId: dto.comment.userId,
+      userLogin: dto.comment.userLogin,
     };
-    dto.createdAt = comment.createdAt;
-    dto.likesInfo = {
-      likesCount: 0,
-      dislikesCount: 0,
-      myStatus: LikeStatusEnum.None,
-      // likesCount: comment.likesInfo.likesCount,
-      // dislikesCount: comment.likesInfo.dislikesCount,
-      // myStatus: comment.likesInfo.myStatus,
+    comment.createdAt = dto.comment.createdAt;
+    comment.likesInfo = {
+      likesCount: dto.likesCount || 0,
+      dislikesCount: dto.dislikesCount || 0,
+      myStatus: dto.myStatus || LikeStatusEnum.None,
     };
 
-    return dto;
+    return comment;
   }
 }

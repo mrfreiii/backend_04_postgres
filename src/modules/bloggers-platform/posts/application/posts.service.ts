@@ -83,7 +83,7 @@ export class PostsService {
   }
 
   async _getLikesCount_pg(postId: string): Promise<number> {
-    const response = await this.likesRepository.getPostLikesStatusCount_pg({
+    const response = await this.postsRepository.getPostLikesStatusCount_pg({
       postId,
       likeStatus: LikeStatusEnum.Like,
     });
@@ -92,7 +92,7 @@ export class PostsService {
   }
 
   async _getDislikesCount_pg(postId: string): Promise<number> {
-    const response = await this.likesRepository.getPostLikesStatusCount_pg({
+    const response = await this.postsRepository.getPostLikesStatusCount_pg({
       postId,
       likeStatus: LikeStatusEnum.Dislike,
     });
@@ -102,7 +102,7 @@ export class PostsService {
 
   async _getLastThreeLikes_pg(postId: string): Promise<NewestLikes[]> {
     const response =
-      await this.likesRepository.getPostLastThreeLikes_pg(postId);
+      await this.postsRepository.getPostLastThreeLikes_pg(postId);
 
     return response ?? [];
   }
@@ -116,7 +116,7 @@ export class PostsService {
     let userLikeStatus = LikeStatusEnum.None;
 
     if (userId) {
-      userLikeStatus = await this.likesRepository.getUserPostLikeStatus_pg({
+      userLikeStatus = await this.postsRepository.getUserPostLikeStatus_pg({
         postId,
         userId,
       });

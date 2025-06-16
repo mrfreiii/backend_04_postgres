@@ -210,33 +210,33 @@ describe("get comments by postId /posts", () => {
     expect(res.body.items[0]).toEqual(createdComment);
   });
 
-  // it("should return comment with correct like-status", async () => {
-  //   await req
-  //     .put(`${SETTINGS.PATH.COMMENTS}/${createdComment.id}/like-status`)
-  //     .set("Authorization", `Bearer ${userToken}`)
-  //     .send({ likeStatus: "Like" })
-  //     .expect(204);
-  //
-  //   const res = await req
-  //     .get(`${SETTINGS.PATH.POSTS}/${createdPostId}/comments`)
-  //     .set("Authorization", `Bearer ${userToken}`)
-  //     .expect(200);
-  //
-  //   expect(res.body.pagesCount).toBe(1);
-  //   expect(res.body.page).toBe(1);
-  //   expect(res.body.pageSize).toBe(10);
-  //   expect(res.body.totalCount).toBe(1);
-  //   expect(res.body.items.length).toBe(1);
-  //
-  //   expect(res.body.items[0]).toEqual({
-  //     ...createdComment,
-  //     likesInfo: {
-  //       dislikesCount: 0,
-  //       likesCount: 1,
-  //       myStatus: "Like",
-  //     },
-  //   });
-  // });
+  it("should return comment with correct like-status", async () => {
+    await req
+      .put(`${SETTINGS.PATH.COMMENTS}/${createdComment.id}/like-status`)
+      .set("Authorization", `Bearer ${userToken}`)
+      .send({ likeStatus: "Like" })
+      .expect(204);
+
+    const res = await req
+      .get(`${SETTINGS.PATH.POSTS}/${createdPostId}/comments`)
+      .set("Authorization", `Bearer ${userToken}`)
+      .expect(200);
+
+    expect(res.body.pagesCount).toBe(1);
+    expect(res.body.page).toBe(1);
+    expect(res.body.pageSize).toBe(10);
+    expect(res.body.totalCount).toBe(1);
+    expect(res.body.items.length).toBe(1);
+
+    expect(res.body.items[0]).toEqual({
+      ...createdComment,
+      likesInfo: {
+        dislikesCount: 0,
+        likesCount: 1,
+        myStatus: "Like",
+      },
+    });
+  });
 });
 
 describe("update post likes /posts/:postId/like-status", () => {

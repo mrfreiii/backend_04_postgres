@@ -18,6 +18,7 @@ export const SETTINGS = {
     POSTS_LIKES: 'public."PostsLikes"',
 
     COMMENTS: 'public."Comments"',
+    COMMENTS_LIKES: 'public."CommentsLikes"',
 
     LIKES_STATUSES: 'public."LikeStatuses"',
     BLOGS: 'public."Blogs"',
