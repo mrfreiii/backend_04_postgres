@@ -2,9 +2,8 @@
 import { configModule } from "./config-dynamic-module";
 
 import { APP_FILTER } from "@nestjs/core";
-import { MongooseModule } from "@nestjs/mongoose";
+import { TypeOrmModule } from "@nestjs/typeorm";
 import { DynamicModule, Module } from "@nestjs/common";
-import { TypeOrmCoreModule } from "@nestjs/typeorm/dist/typeorm-core.module";
 
 import { CoreModule } from "./core/core.module";
 import { CoreConfig } from "./core/config/core.config";
@@ -18,19 +17,7 @@ import { DomainHttpExceptionsFilter } from "./core/exceptions/filters/domain-exc
 @Module({
   imports: [
     configModule,
-    MongooseModule.forRootAsync({
-      useFactory: (coreConfig: CoreConfig) => {
-        const uri = coreConfig.mongoURL;
-        const dbName = coreConfig.mongoDbName;
-
-        return {
-          uri,
-          dbName,
-        };
-      },
-      inject: [CoreConfig],
-    }),
-    TypeOrmCoreModule.forRootAsync({
+    TypeOrmModule.forRootAsync({
       useFactory: (coreConfig: CoreConfig) => {
         const host = coreConfig.postgresURL;
         const port = coreConfig.postgresPort;
